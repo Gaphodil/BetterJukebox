@@ -199,12 +199,8 @@ namespace Gaphodil.BetterJukebox.Framework
                     15*4), 
                 "",
                 null,
-                _BetterJukeboxGraphics,
-                Game1.getSourceRectForStandardTileSheet(
-                    _BetterJukeboxGraphics,
-                    0,
-                    16,
-                    15),
+                Game1.mouseCursors, 
+                new Rectangle(175, 379, 16, 15),
                 4f);
 
             if (GetNumberOfLocalMiniJukeboxes() == 0)
@@ -223,11 +219,7 @@ namespace Gaphodil.BetterJukebox.Framework
                     "",
                     null,
                     _BetterJukeboxGraphics,
-                    Game1.getSourceRectForStandardTileSheet(
-                        _BetterJukeboxGraphics,
-                        1,
-                        16,
-                        15),
+                    new Rectangle(0, 0, 16, 15),
                     4f);
             }
 
