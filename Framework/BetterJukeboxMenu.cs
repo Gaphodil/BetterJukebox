@@ -203,7 +203,8 @@ namespace Gaphodil.BetterJukebox.Framework
                 new Rectangle(175, 379, 16, 15),
                 4f);
 
-            if (GetNumberOfLocalMiniJukeboxes() == 0)
+            // avoids drawing stop button in Saloon
+            if (Game1.player.currentLocation.name.Equals("Saloon"))
             {
                 StopButton = null;
             }
