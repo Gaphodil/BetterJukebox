@@ -89,8 +89,18 @@ namespace Gaphodil.BetterJukebox
                 //        list.Add("rain");
                 //}
                 list.Remove("title_day"); // this one gets removed for A Good Reason, apparently
-                if (list.IndexOf("MainTheme") == -1)
-                    list.Insert(0, "MainTheme"); // this is the one change that isn't true to how the game does it, because it makes me angy >:L
+
+                // this is the one change that isn't true to how the game does it, because it makes me angy >:L
+                int MTIndex = list.IndexOf("MainTheme");
+                if (MTIndex.Equals(0)) ;
+                else {
+                    if (MTIndex.Equals(-1)) ;
+                    else list.RemoveAt(MTIndex);
+                    list.Insert(0, "MainTheme"); 
+                }
+
+                // speculative fix for Nexus page bug report
+                list.Remove("resetVariable");
 
                 // create and activate the menu
                 Game1.activeClickableMenu = new BetterJukeboxMenu(
