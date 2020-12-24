@@ -127,7 +127,7 @@ namespace Gaphodil.BetterJukebox
         {
             for (int index = trackList.Count - 1; index >= 0; --index)
             {
-                if (trackList[index].ToLower().Contains("ambient") || trackList[index].ToLower().Contains("bigdrums") || (trackList[index].ToLower().Contains("clubloop") || trackList[index].ToLower().Contains("ambience")))
+                if (trackList[index].ToLower().Contains("ambient") || trackList[index].ToLower().Contains("bigdrums") || trackList[index].ToLower().Contains("clubloop") || trackList[index].ToLower().Contains("ambience"))
                 {
                     trackList.RemoveAt(index);
                 }
@@ -135,7 +135,7 @@ namespace Gaphodil.BetterJukebox
                 {
                     switch (trackList[index])
                     {
-                        case "buglevelloop":
+                        case "buglevelloop": // vanilla bug: should be "bugLevelLoop"
                             trackList.RemoveAt(index);
                             continue;
                         case "coin":
