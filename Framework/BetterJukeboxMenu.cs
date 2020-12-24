@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
-using StardewValley.Objects;
 
 namespace Gaphodil.BetterJukebox.Framework
 {
@@ -61,6 +60,13 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <summary>The stop button.</summary>
         public ClickableTextureComponent StopButton;
 
+        // new in 1.5
+        /// <summary>The random button.</summary>
+        public ClickableTextureComponent RandomButton;
+
+        /// <summary>Whether the random option is currently active.</summary>
+        private bool IsRandom = false;
+
         /// <summary>The number of visible Options.</summary>
         private const int _itemsPerPage = 7;
 
@@ -115,8 +121,8 @@ namespace Gaphodil.BetterJukebox.Framework
             string defaultSelection = "",
             bool showInternalID = false)
             : base (
-                Game1.viewport.Width  / 2 - (w + borderWidth * 2) / 2, 
-                Game1.viewport.Height / 2 - (h + borderWidth * 2) / 2, 
+                Game1.uiViewport.Width  / 2 - (w + borderWidth * 2) / 2, // 1.5: switch from viewport to uiViewport
+                Game1.uiViewport.Height / 2 - (h + borderWidth * 2) / 2, 
                 w + borderWidth * 2, 
                 h + borderWidth * 2,
                 true)
@@ -144,6 +150,13 @@ namespace Gaphodil.BetterJukebox.Framework
                     PlayingIndex = -1;
                     Monitor.Log("Found no active jukebox(es)!");
                 }
+            }
+            // new in 1.5: value is random
+            else if (Game1.player.currentLocation.miniJukeboxTrack.Value.Equals("random"))
+            {
+                PlayingIndex = -1;
+                Monitor.Log("Found active random mini-jukebox(es)!");
+                IsRandom = true;
             }
             else
             {
@@ -195,8 +208,8 @@ namespace Gaphodil.BetterJukebox.Framework
                 new Rectangle(
                     xPositionOnScreen + width   - borderWidth - spaceToClearSideBorder - _spacingPixels * 4,
                     yPositionOnScreen           + _spacingPixels,
-                    16*4,
-                    15*4), 
+                    16 * 4,
+                    15 * 4), 
                 "",
                 null,
                 Game1.mouseCursors, 
@@ -207,6 +220,7 @@ namespace Gaphodil.BetterJukebox.Framework
             if (Game1.player.currentLocation.name.Equals("Saloon"))
             {
                 StopButton = null;
+                RandomButton = null;
             }
             else
             {
@@ -216,11 +230,23 @@ namespace Gaphodil.BetterJukebox.Framework
                         xPositionOnScreen + width   - borderWidth - spaceToClearSideBorder - _spacingPixels * 2,
                         yPositionOnScreen           + _spacingPixels,
                         16 * 4,
-                        15*4),
+                        15 * 4),
                     "",
                     null,
                     _BetterJukeboxGraphics,
                     new Rectangle(0, 0, 16, 15),
+                    4f);
+                RandomButton = new ClickableTextureComponent(
+                    "random",
+                    new Rectangle(
+                        xPositionOnScreen + width   - borderWidth - spaceToClearSideBorder - _spacingPixels * 6,
+                        yPositionOnScreen           + _spacingPixels,
+                        16 * 4,
+                        15 * 4),
+                    "",
+                    null,
+                    Game1.mouseCursors,
+                    new Rectangle(381, 361, 10, 10),
                     4f);
             }
 
@@ -357,6 +383,7 @@ namespace Gaphodil.BetterJukebox.Framework
         {
             ChooseAction(Options[SelectedIndex]);
             PlayingIndex = SelectedIndex;
+            IsRandom = false;
 
             Monitor.Log("Jukebox now playing: " + Options[SelectedIndex]);
 
@@ -374,8 +401,27 @@ namespace Gaphodil.BetterJukebox.Framework
 
             ChooseAction("turn_off");
             PlayingIndex = -1;
+            IsRandom = false;
 
             Monitor.Log("Jukebox turned off!");
+
+            Game1.playSound("select");
+        }
+
+        private void RandomButtonPressed()
+        {
+            if (GetNumberOfLocalMiniJukeboxes() == 0) // this shouldn't happen!
+            {
+                Monitor.Log("RandomButtonPressed() despite no mini-jukeboxes!", LogLevel.Error);
+                return;
+            }
+
+            ChooseAction("random"); // NOTE: this will not include "typically removed" tracks even if enabled
+            // above sets GameLocation.randomMiniJukeboxTrack.Value
+            PlayingIndex = -1;
+            IsRandom = true;
+
+            Monitor.Log("Random selected! Now playing: " + Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
 
             Game1.playSound("select");
         }
@@ -428,6 +474,12 @@ namespace Gaphodil.BetterJukebox.Framework
             else if (StopButton != null && StopButton.containsPoint(x,y))
             {
                 StopButtonPressed();
+                Game1.playSound("select");
+            }
+            // and now random button
+            else if (RandomButton != null && RandomButton.containsPoint(x,y))
+            {
+                RandomButtonPressed();
                 Game1.playSound("select");
             }
 
@@ -521,6 +573,7 @@ namespace Gaphodil.BetterJukebox.Framework
             if (SelectedIndex >= 0)
                 PlayButton.tryHover(x, y);
             StopButton?.tryHover(x, y);
+            RandomButton?.tryHover(x, y); // doesn't seem to work?
         }
 
         /// <summary>The method invoked when the player scrolls the mousewheel.</summary>
@@ -548,9 +601,9 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <param name="newBounds">The new viewport.</param>
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
         {
-            //base.gameWindowSizeChanged(oldBounds, newBounds);
-            xPositionOnScreen = newBounds.Width  / 2 - width  / 2;
-            yPositionOnScreen = newBounds.Height / 2 - height / 2;
+            base.gameWindowSizeChanged(oldBounds, newBounds);
+            //xPositionOnScreen = newBounds.Width  / 2 - width  / 2; // tried to do it manually because I noticed a vanilla bug
+            //yPositionOnScreen = newBounds.Height / 2 - height / 2; // turns out: this was worse!
 
             // refresh ui
             SetUpPositions();
@@ -610,7 +663,12 @@ namespace Gaphodil.BetterJukebox.Framework
             if (PlayingIndex > -1)
                 song_name = Utility.getSongTitleFromCueName(Options[PlayingIndex]);
             else
-                song_name = Utility.getSongTitleFromCueName("turn_off");
+            {
+                if (IsRandom)
+                    song_name = Utility.getSongTitleFromCueName(Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                else
+                    song_name = Utility.getSongTitleFromCueName("turn_off");
+            }
 
             Utility.drawTextWithShadow(
                 b,
@@ -714,6 +772,38 @@ namespace Gaphodil.BetterJukebox.Framework
             // draw the play and stop buttons
             PlayButton.draw(b);
             StopButton?.draw(b);
+            // and the random button
+            if (RandomButton != null)
+            {
+                RandomButton.draw(b);
+                // draw check/cross
+                if (IsRandom)
+                {
+                    b.Draw(ChatBox.emojiTexture,
+                           new Vector2( RandomButton.bounds.X + 6 * 4, 
+                                        RandomButton.bounds.Y + 6 * 4),
+                           new Rectangle(117, 81, 9, 9),
+                           Color.White,
+                           0f,
+                           Vector2.Zero,
+                           4f,
+                           SpriteEffects.None,
+                           0.99f);
+                }
+                else
+                {
+                    b.Draw(ChatBox.emojiTexture,
+                           new Vector2( RandomButton.bounds.X + 6 * 4,
+                                        RandomButton.bounds.Y + 6 * 4),
+                           new Rectangle(45, 81, 9, 9),
+                           Color.White,
+                           0f,
+                           Vector2.Zero,
+                           4f,
+                           SpriteEffects.None,
+                           0.99f);
+                }
+            }
 
             // draw the scrolling elements
             if (VisibleOptions.Count >= Options.Count)
