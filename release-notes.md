@@ -1,6 +1,14 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
+### 1.1.1
+Released 27 Dec 2020.
+
+* Added speculative gamepad support
+* Added hover effect to more buttons
+* Added menu background if enabled
+* Added slight tint over background if menu background is not enabled
+
 ## 1.1
 Released 23 Dec 2020.
 
