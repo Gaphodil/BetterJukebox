@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
@@ -11,9 +12,9 @@ namespace Gaphodil.BetterJukebox.Framework
     /// <summary>The menu which lets the player choose a song to play.</summary>
     public class BetterJukeboxMenu : IClickableMenu
     {
-        /*
+        /************
          * Attributes
-         */
+         ************/
 
         // ---- The parts from ShopMenu:
 
@@ -43,7 +44,7 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <summary>The index of the currently active selection from the Options.</summary>
         private int SelectedIndex;
 
-        /// <summary>The lowest visible index on the menu.</summary>
+        /// <summary>The lowest index from Options that is on the menu at the top of VisibleOptions.</summary>
         private int LowestVisibleIndex;
 
         /// <summary>The method that will be called when a button is pressed.</summary>
@@ -63,6 +64,14 @@ namespace Gaphodil.BetterJukebox.Framework
         // new in 1.5
         /// <summary>The random button.</summary>
         public ClickableTextureComponent RandomButton;
+
+        // ClickableComponent ids used for controller snap-to functions
+        public const int BaseID = 601700;
+        public const int PlayID = BaseID + 10;
+        public const int StopID = BaseID + 20;
+        public const int RandomID = BaseID + 30;
+        public const int UpArrowID = BaseID + 40;
+        public const int DownArrowID = BaseID + 50;
 
         /// <summary>Whether the random option is currently active.</summary>
         private bool IsRandom = false;
@@ -105,9 +114,9 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <summary>The SMAPI Monitor for logging messages.</summary>
         private readonly IMonitor Monitor;
 
-        /* 
+        /**************** 
          * Public methods
-         */
+         ****************/
 
         /// <summary>Construct an instance.</summary>
         /// <param name="options">The list of songs to display.</param>
@@ -187,15 +196,22 @@ namespace Gaphodil.BetterJukebox.Framework
             // setup ui
             SetUpPositions();
 
+            // from ShopMenu: 
+            if (Game1.options.snappyMenus && Game1.options.gamepadControls)
+            {
+                base.populateClickableComponentList();
+                snapToDefaultClickableComponent();
+            }
+
         }
 
         /// <summary>The action that is taken when an option is selected.</summary>
         /// <param name="s">The string passed to the action.</param>
         public delegate void actionOnChoosingListOption(string s);
 
-        /* 
+        /***************** 
          * Private methods
-         */
+         *****************/
 
         // ---- UI methods
 
@@ -209,12 +225,18 @@ namespace Gaphodil.BetterJukebox.Framework
                     xPositionOnScreen + width   - borderWidth - spaceToClearSideBorder - _spacingPixels * 4,
                     yPositionOnScreen           + _spacingPixels,
                     16 * 4,
-                    15 * 4), 
+                    15 * 4),
                 "",
                 null,
-                Game1.mouseCursors, 
+                Game1.mouseCursors,
                 new Rectangle(175, 379, 16, 15),
-                4f);
+                4f)
+            { // ... and set ids for controller support
+                myID = PlayID,
+                leftNeighborID = RandomID,
+                rightNeighborID = StopID,
+                downNeighborID = BaseID
+            };
 
             // avoids drawing stop button in Saloon
             if (Game1.player.currentLocation.name.Equals("Saloon"))
@@ -235,7 +257,12 @@ namespace Gaphodil.BetterJukebox.Framework
                     null,
                     _BetterJukeboxGraphics,
                     new Rectangle(0, 0, 16, 15),
-                    4f);
+                    4f)
+                {
+                    myID = StopID,
+                    leftNeighborID = PlayID,
+                    downNeighborID = BaseID
+                };
                 RandomButton = new ClickableTextureComponent(
                     "random",
                     new Rectangle(
@@ -247,13 +274,18 @@ namespace Gaphodil.BetterJukebox.Framework
                     null,
                     Game1.mouseCursors,
                     new Rectangle(381, 361, 10, 10),
-                    4f);
+                    4f)
+                {
+                    myID = RandomID,
+                    rightNeighborID = PlayID,
+                    downNeighborID = BaseID
+                };
             }
 
             // set up VisibleOptions to select from
             UpdateVisibleOptions();
 
-            // set up scrolling widgets
+            // set up scrolling widgets (IDs from ShopMenu)
             UpArrow = new ClickableTextureComponent(
                 new Rectangle(
                     xPositionOnScreen + width   + _spacingPixels / 2,
@@ -262,7 +294,12 @@ namespace Gaphodil.BetterJukebox.Framework
                     48),
                 Game1.mouseCursors,
                 new Rectangle(421,459,11,12),   // up arrow
-                4f);
+                4f)
+            { 
+                myID = UpArrowID,
+                downNeighborID = DownArrowID,
+                leftNeighborID = BaseID
+            };
 
             DownArrow = new ClickableTextureComponent(
                 new Rectangle(
@@ -272,7 +309,12 @@ namespace Gaphodil.BetterJukebox.Framework
                     48), 
                 Game1.mouseCursors,
                 new Rectangle(421,472,11,12),   // down arrow
-                4f);
+                4f)
+            {
+                myID = DownArrowID,
+                upNeighborID = UpArrowID,
+                leftNeighborID = BaseID
+            };
 
             ScrollBar = new ClickableTextureComponent(
                 new Rectangle(
@@ -313,12 +355,18 @@ namespace Gaphodil.BetterJukebox.Framework
                         _longestNameWidth + 4,
                         _spacingPixels * 2),
                     Options[options_index])
-                );
+                    { // from ShopMenu
+                        myID = BaseID + i,
+                        upNeighborID = (i == 0) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i + 1,
+                        downNeighborID = (i == _itemsPerPage - 1) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i - 1,
+                        rightNeighborID = UpArrowID,
+                        fullyImmutable = true
+                    });
             }
         }
 
         /// <summary>Updates the ScrollBar to the current index.</summary>
-        private void SetScrollBarToLowestVisibleIndex() // TODO
+        private void SetScrollBarToLowestVisibleIndex() 
         {
             // Implementation derived from ShopMenu
             if (Options.Count <= 0 || MaxScrollIndex() == 0)
@@ -426,9 +474,9 @@ namespace Gaphodil.BetterJukebox.Framework
             Game1.playSound("select");
         }
 
-        /*
+        /******************
          * Override methods
-         */
+         ******************/
 
         /// <summary>The method invoked when the player left-clicks on the menu.</summary>
         /// <param name="x">The X-position of the cursor.</param>
@@ -573,7 +621,10 @@ namespace Gaphodil.BetterJukebox.Framework
             if (SelectedIndex >= 0)
                 PlayButton.tryHover(x, y);
             StopButton?.tryHover(x, y);
-            RandomButton?.tryHover(x, y); // doesn't seem to work?
+            RandomButton?.tryHover(x, y, 0.2f); // works now!
+            // forgot about these
+            UpArrow.tryHover(x, y);
+            DownArrow.tryHover(x, y);
         }
 
         /// <summary>The method invoked when the player scrolls the mousewheel.</summary>
@@ -596,6 +647,43 @@ namespace Gaphodil.BetterJukebox.Framework
             }
         }
 
+        // ---- Controller related
+        // mostly derived from ShopMenu
+
+        // appears to be only called when trying to move in a direction with ClickableComponent.CUSTOM_SNAP_BEHAVIOR as the next id
+        protected override void customSnapBehavior(int direction, int oldRegion, int oldID)
+        {
+            switch (direction)
+            {
+                case 2: // down
+                    if (LowestVisibleIndex < MaxScrollIndex()) // not bottom of list
+                        DownArrowPressed(); // no change in cursor location needed
+                    break; 
+                case 0: // up
+                    if (LowestVisibleIndex > 0) // not top of list
+                        UpArrowPressed(); // no cursor change needed
+                    else // moving from top of list to play button
+                    {
+                        base.currentlySnappedComponent = PlayButton;
+                        snapCursorToCurrentSnappedComponent();
+                    }
+                    break;
+            }
+        }
+        public override void snapToDefaultClickableComponent()
+        {
+            base.currentlySnappedComponent = VisibleOptions[0];
+            snapCursorToCurrentSnappedComponent(); 
+        }
+
+        // used for tab button cycling; will add when sort methods are implemented
+        public override void receiveGamePadButton(Buttons b)
+        {
+            base.receiveGamePadButton(b);
+        }
+
+        // ---- Drawing related
+
         /// <summary>The method called when the game window changes size.</summary>
         /// <param name="oldBounds">The former viewport.</param>
         /// <param name="newBounds">The new viewport.</param>
@@ -615,6 +703,16 @@ namespace Gaphodil.BetterJukebox.Framework
         public override void draw(SpriteBatch b)
         {
             // Implementation derived from ChooseFromListMenu
+
+            // from ShopMenu: draw menuBackground if enabled
+            if (Game1.options.showMenuBackground)
+            {
+                base.drawBackground(b);
+            }
+            else
+            {
+                b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f); // 0.4 is default(?); used in GameMenu
+            }
 
             // draw menu box
             drawTextureBox(

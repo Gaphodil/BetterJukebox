@@ -1,7 +1,7 @@
 {
     "Name": "Better Jukebox",
     "Author": "Gaphodil",
-    "Version": "1.1.0",
+    "Version": "1.1.1",
     "MinimumApiVersion": "3.8.0",
     "Description": "Improves the Mini-Jukebox and Saloon's jukebox interfaces.",
     "UniqueID": "Gaphodil.BetterJukebox",
