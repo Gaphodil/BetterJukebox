@@ -1,6 +1,11 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
+### 1.1.2
+Released 27 Dec 2020.
+
+* Fixed snapping for list buttons
+
 ### 1.1.1
 Released 27 Dec 2020.
 
