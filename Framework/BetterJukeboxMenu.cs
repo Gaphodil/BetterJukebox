@@ -235,7 +235,8 @@ namespace Gaphodil.BetterJukebox.Framework
                 myID = PlayID,
                 leftNeighborID = RandomID,
                 rightNeighborID = StopID,
-                downNeighborID = BaseID
+                downNeighborID = BaseID,
+                fullyImmutable = true
             };
 
             // avoids drawing stop button in Saloon
@@ -297,6 +298,7 @@ namespace Gaphodil.BetterJukebox.Framework
                 4f)
             { 
                 myID = UpArrowID,
+                upNeighborID = PlayID,
                 downNeighborID = DownArrowID,
                 leftNeighborID = BaseID
             };
@@ -357,11 +359,13 @@ namespace Gaphodil.BetterJukebox.Framework
                     Options[options_index])
                     { // from ShopMenu
                         myID = BaseID + i,
-                        upNeighborID = (i == 0) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i + 1,
-                        downNeighborID = (i == _itemsPerPage - 1) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i - 1,
+                        upNeighborID = (i == 0) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i - 1,
+                        downNeighborID = (i == _itemsPerPage - 1) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i + 1,
                         rightNeighborID = UpArrowID,
                         fullyImmutable = true
-                    });
+                    }
+                );
+                // Monitor.Log(string.Format("VisibleOption {0} has baseID {1} and downNeighborID {2}",i, VisibleOptions[i].myID, VisibleOptions[i].downNeighborID));
             }
         }
 
