@@ -1,8 +1,8 @@
 # Planned features
 
 * Config option to allow selection from all songs instead of just those previously heard
-* Buttons to sort the list (alphabetical, heard order (default), Bandcamp ordering)
-* ADDED - Keyboard and (hypothetical) controller support - keyboard was never supported to begin with, controller support still hypothetical
+* MOSTLY DONE - Buttons to sort the list (alphabetical, heard order (default), Bandcamp ordering)
+* ADDED - Keyboard and (hypothetical) controller support
 * Possible support for [audio addition/replacement mods](https://www.nexusmods.com/stardewvalley/mods/categories/12/)
 * May be better suited for a different mod (most probably require Harmony):
   * Allow music to play in the rain

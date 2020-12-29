@@ -52,11 +52,14 @@ namespace Gaphodil.BetterJukebox.Framework
 
         // ---- Other parts:
 
-        /// <summary>The index of the currently playing song.</summary>
-        private int PlayingIndex;
+        /// <summary>The original list of songs, passed to the constructor.</summary>
+        private readonly List<string> OriginalOptions;
 
         /// <summary>The play button.</summary>
         public ClickableTextureComponent PlayButton;
+
+        /// <summary>The index of the currently playing song.</summary>
+        private int PlayingIndex;
 
         /// <summary>The stop button.</summary>
         public ClickableTextureComponent StopButton;
@@ -65,6 +68,17 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <summary>The random button.</summary>
         public ClickableTextureComponent RandomButton;
 
+        /// <summary>The list of tabs, used for switching sorting methods.</summary>
+        public List<ClickableTextureComponent> SortTabs = new List<ClickableTextureComponent>();
+
+        /// <summary>The index of the currently selected tab.</summary>
+        private int SelectedTab = 0;
+
+        private readonly string ModDataTabKey = "6017/jukebox-tab";
+
+        /// <summary>The text that displays when a tab is hovered over.</summary>
+        private string HoverText;
+
         // ClickableComponent ids used for controller snap-to functions
         public const int BaseID = 601700;
         public const int PlayID = BaseID + 10;
@@ -72,6 +86,7 @@ namespace Gaphodil.BetterJukebox.Framework
         public const int RandomID = BaseID + 30;
         public const int UpArrowID = BaseID + 40;
         public const int DownArrowID = BaseID + 50;
+        public const int TabsID = BaseID + 60;
 
         /// <summary>Whether the random option is currently active.</summary>
         private bool IsRandom = false;
@@ -137,7 +152,8 @@ namespace Gaphodil.BetterJukebox.Framework
                 true)
         {
             // assign parameters
-            Options = options;
+            OriginalOptions = options;
+            Options.AddRange(options);
             ChooseAction = chooseAction;
             _BetterJukeboxGraphics = graphics;
             GetTranslation = getTranslation;
@@ -172,7 +188,9 @@ namespace Gaphodil.BetterJukebox.Framework
                 PlayingIndex = SelectedIndex;
                 Monitor.Log("Found active mini-jukebox(es)!");
             }
-            LowestVisibleIndex = Math.Max(0, Math.Min(SelectedIndex, MaxScrollIndex()));
+
+            // this line is now called in SortOptions
+            // LowestVisibleIndex = Math.Max(0, Math.Min(SelectedIndex, MaxScrollIndex()));
 
             // setup constants
 
@@ -192,6 +210,20 @@ namespace Gaphodil.BetterJukebox.Framework
 
             // play The Big Selectbowski
             Game1.playSound("bigSelect");
+
+            // reorder options based on last sorting method
+            if (Game1.player.modData.ContainsKey(ModDataTabKey))
+            {
+                SelectedTab = int.Parse(Game1.player.modData[ModDataTabKey]);
+                Monitor.Log("Retrieved " + SelectedTab + " from modData!");
+            }
+            else
+            {
+                Game1.player.modData[ModDataTabKey] = SelectedTab.ToString();
+                Monitor.Log("Stored " + SelectedTab + " in modData!");
+            }
+
+            SortOptions();
 
             // setup ui
             SetUpPositions();
@@ -278,10 +310,94 @@ namespace Gaphodil.BetterJukebox.Framework
                     4f)
                 {
                     myID = RandomID,
+                    leftNeighborID = TabsID + SelectedTab, // whichever is currently active
                     rightNeighborID = PlayID,
                     downNeighborID = BaseID
                 };
             }
+
+            // set up sorting tabs, positions from ShopMenu
+            // default sort
+            SortTabs.Add(new ClickableTextureComponent(
+                "ear",
+                new Rectangle(
+                    xPositionOnScreen - 64,
+                    yPositionOnScreen - 64 * 0 + 16,
+                    64,
+                    64),
+                "",
+                "Heard order (Default)",
+                _BetterJukeboxGraphics,
+                new Rectangle(16, 0, 16, 16),
+                4f)
+            {
+                myID = TabsID,
+                rightNeighborID = RandomID,
+                downNeighborID = TabsID + 1,
+                fullyImmutable = true
+            });
+            // soundtrack order (TODO)
+            SortTabs.Add(new ClickableTextureComponent(
+                "cd",
+                new Rectangle(
+                    xPositionOnScreen - 64,
+                    yPositionOnScreen - 64 * 1 + 16,
+                    64,
+                    64),
+                "",
+                "Soundtrack order (NOT IMPLEMENTED)",
+                _BetterJukeboxGraphics,
+                new Rectangle(32, 0, 16, 16),
+                4f)
+            {
+                myID = TabsID + 1,
+                rightNeighborID = RandomID,
+                upNeighborID = TabsID,
+                downNeighborID = TabsID + 2,
+                fullyImmutable = true
+            });
+            // alphabetical by song title
+            SortTabs.Add(new ClickableTextureComponent(
+                "alpha1",
+                new Rectangle(
+                    xPositionOnScreen - 64,
+                    yPositionOnScreen - 64 * 2 + 16,
+                    64,
+                    64),
+                "",
+                "Alphabetical (song title)",
+                _BetterJukeboxGraphics,
+                new Rectangle(0, 16, 16, 16),
+                4f)
+            {
+                myID = TabsID + 2,
+                rightNeighborID = RandomID,
+                upNeighborID = TabsID + 1,
+                downNeighborID = TabsID + 3,
+                fullyImmutable = true
+            });
+            // alphabetical by cue name
+            SortTabs.Add(new ClickableTextureComponent(
+                "alpha2",
+                new Rectangle(
+                    xPositionOnScreen - 64,
+                    yPositionOnScreen - 64 * 3 + 16,
+                    64,
+                    64),
+                "",
+                "Alphabetical (cue name)",
+                _BetterJukeboxGraphics,
+                new Rectangle(16, 16, 16, 16),
+                4f)
+            {
+                myID = TabsID + 3,
+                rightNeighborID = RandomID,
+                upNeighborID = TabsID + 2,
+                fullyImmutable = true
+            });
+
+            // reposition the tabs
+            RepositionTabs();
 
             // set up VisibleOptions to select from
             UpdateVisibleOptions();
@@ -338,6 +454,18 @@ namespace Gaphodil.BetterJukebox.Framework
             SetScrollBarToLowestVisibleIndex();
         }
 
+        /// <summary>Repositions tabs so that the active one is positioned in front.</summary>
+        private void RepositionTabs()
+        {
+            for (int i = 0; i < SortTabs.Count; ++i)
+            {
+                if (i == SelectedTab)
+                    SortTabs[i].bounds.X = xPositionOnScreen - 56;
+                else SortTabs[i].bounds.X = xPositionOnScreen - 64;
+                SortTabs[i].bounds.Y = yPositionOnScreen + (i * 64) + 16;
+            }
+        }
+
         /// <summary>Updates the list of visible options, to be called if scrolling occurs.</summary>
         private void UpdateVisibleOptions()
         {
@@ -361,6 +489,7 @@ namespace Gaphodil.BetterJukebox.Framework
                         myID = BaseID + i,
                         upNeighborID = (i == 0) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i - 1,
                         downNeighborID = (i == _itemsPerPage - 1) ? ClickableComponent.CUSTOM_SNAP_BEHAVIOR : BaseID + i + 1,
+                        leftNeighborID = TabsID + SelectedTab, // whichever is currently active
                         rightNeighborID = UpArrowID,
                         fullyImmutable = true
                     }
@@ -383,6 +512,57 @@ namespace Gaphodil.BetterJukebox.Framework
         }
 
         // ---- Helper methods
+
+        /// <summary>
+        /// Comparison function for sorting options by the song's title.
+        /// </summary>
+        /// <param name="cue1">The cue of the first song.</param>
+        /// <param name="cue2">The cue of the second song.</param>
+        /// <returns></returns>
+        private static int SortBySongTitle(string cue1, string cue2)
+        {
+            string songTitle1 = Utility.getSongTitleFromCueName(cue1);
+            string songTitle2 = Utility.getSongTitleFromCueName(cue2);
+            return songTitle1.CompareTo(songTitle2);
+        }
+
+        /// <summary>
+        /// Sort Options based on the SelectedTab.
+        /// </summary>
+        private void SortOptions()
+        {
+            // remember player's selected sort in modData
+            Game1.player.modData[ModDataTabKey] = SelectedTab.ToString();
+            Monitor.Log("Stored " + SelectedTab + " in modData!");
+            // save last selected index
+            if (SelectedIndex != PlayingIndex) SelectedIndex = PlayingIndex;
+            string orig_cue = "";
+            if (SelectedIndex != -1) orig_cue = Options[SelectedIndex];
+            // do the sort
+            switch (SelectedTab) {
+                case 0: // default sort
+                    // hard copy OriginalOptions
+                    Options.Clear();
+                    Options.AddRange(OriginalOptions);
+                    break;
+                case 1: // soundtrack order
+                    break;
+                case 2: // alphabetical by SongTitle
+                    Options.Sort(SortBySongTitle);
+                    break;
+                case 3: // alphabetical by normal
+                    Options.Sort();
+                    break;
+            }
+            // get index of new list
+            if (SelectedIndex != -1 && !orig_cue.Equals(""))
+            {
+                SelectedIndex = Options.IndexOf(orig_cue);
+                PlayingIndex = SelectedIndex;
+            }
+            // set as top of visible
+            LowestVisibleIndex = Math.Max(0, Math.Min(SelectedIndex, MaxScrollIndex()));
+        }
 
         /// <summary>Returns the max index of options that can display at the top of the list.</summary>
         /// <returns>the index</returns>
@@ -439,7 +619,8 @@ namespace Gaphodil.BetterJukebox.Framework
 
             Monitor.Log("Jukebox now playing: " + Options[SelectedIndex]);
 
-            Game1.playSound("select");
+            // duplicate oops
+            // Game1.playSound("select");
         }
 
         /// <summary>Handles the StopButton.</summary>
@@ -457,10 +638,10 @@ namespace Gaphodil.BetterJukebox.Framework
 
             Monitor.Log("Jukebox turned off!");
 
-            Game1.playSound("select");
+            // Game1.playSound("select");
         }
 
-        private void RandomButtonPressed()
+        private void RandomButtonPressed() 
         {
             if (GetNumberOfLocalMiniJukeboxes() == 0) // this shouldn't happen!
             {
@@ -470,12 +651,15 @@ namespace Gaphodil.BetterJukebox.Framework
 
             ChooseAction("random"); // NOTE: this will not include "typically removed" tracks even if enabled
             // above sets GameLocation.randomMiniJukeboxTrack.Value
+            // vanilla bug(?): only happens IF miniJukeboxTrack is "random", which is set AFTER the randomize attempt is made
+            if (Game1.player.currentLocation.randomMiniJukeboxTrack.Value.Equals(""))
+                ChooseAction("random"); // do it again
             PlayingIndex = -1;
             IsRandom = true;
 
             Monitor.Log("Random selected! Now playing: " + Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
 
-            Game1.playSound("select");
+            // Game1.playSound("select");
         }
 
         /******************
@@ -538,6 +722,21 @@ namespace Gaphodil.BetterJukebox.Framework
             // option select (give 'em the mixup)
             else
             {
+                // first tabs
+                for (int i = 0; i < SortTabs.Count; ++i)
+                {
+                    ClickableComponent sort_tab = SortTabs[i];
+                    if (sort_tab.containsPoint(x,y))
+                    {
+                        SelectedTab = i;
+                        SortOptions();
+                        RepositionTabs();
+                        UpdateVisibleOptions();
+                        SetScrollBarToLowestVisibleIndex();
+                        Game1.playSound("shwip");
+                    }
+                }
+                // then actual options
                 for (int i = 0; i < VisibleOptions.Count; ++i)
                 {
                     ClickableComponent visible_option = VisibleOptions[i];
@@ -622,6 +821,8 @@ namespace Gaphodil.BetterJukebox.Framework
         {
             base.performHoverAction(x, y);
 
+            HoverText = "";
+
             if (SelectedIndex >= 0)
                 PlayButton.tryHover(x, y);
             StopButton?.tryHover(x, y);
@@ -629,6 +830,12 @@ namespace Gaphodil.BetterJukebox.Framework
             // forgot about these
             UpArrow.tryHover(x, y);
             DownArrow.tryHover(x, y);
+            // maybe this displays hovertext?
+            for (int i = 0; i < SortTabs.Count; ++i)
+            {
+                if (SortTabs[i].containsPoint(x, y))
+                    HoverText = SortTabs[i].hoverText;
+            }
         }
 
         /// <summary>The method invoked when the player scrolls the mousewheel.</summary>
@@ -684,6 +891,25 @@ namespace Gaphodil.BetterJukebox.Framework
         public override void receiveGamePadButton(Buttons b)
         {
             base.receiveGamePadButton(b);
+            // derived from CheatsMenu, sorry/thanks CJB/Pathos!
+            if (b == Buttons.LeftShoulder || b == Buttons.RightShoulder)
+            {
+                // rotate tab index
+                if (b == Buttons.LeftShoulder)
+                    SelectedTab--;
+                if (b == Buttons.RightShoulder)
+                    SelectedTab++;
+
+                if (SelectedTab >= SortTabs.Count)
+                    SelectedTab = 0;
+                if (SelectedTab < 0)
+                    SelectedTab = SortTabs.Count - 1;
+
+                SortOptions();
+                RepositionTabs();
+                UpdateVisibleOptions();
+                SetScrollBarToLowestVisibleIndex();
+            }
         }
 
         // ---- Drawing related
@@ -907,6 +1133,12 @@ namespace Gaphodil.BetterJukebox.Framework
                 }
             }
 
+            // draw the SortTabs
+            for (int i = 0; i < SortTabs.Count; ++i)
+            {
+                SortTabs[i].draw(b);
+            }
+
             // draw the scrolling elements
             if (VisibleOptions.Count >= Options.Count)
                 ; // do nothing
@@ -927,6 +1159,12 @@ namespace Gaphodil.BetterJukebox.Framework
                     Color.White,
                     4f);
                 ScrollBar.draw(b);
+            }
+
+            // from ShopMenu: draw tooltip (hover)
+            if (!HoverText.Equals(""))
+            {
+                IClickableMenu.drawHoverText(b, HoverText, Game1.smallFont);
             }
 
             // draw the upper right close button

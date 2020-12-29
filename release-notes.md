@@ -1,6 +1,12 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
+## 1.2
+Released 28 Dec 2020.
+
+* Added alphabetical sorting (soundtrack order to come)
+* Handle vanilla failure when `random` is selected for the first time on a save file
+
 ### 1.1.2
 Released 27 Dec 2020.
 
