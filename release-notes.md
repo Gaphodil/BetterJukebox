@@ -1,6 +1,12 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
+## 1.2.1
+Released 05 Jul 2021.
+
+* Added support for [GenericModConfigMenu](https://www.nexusmods.com/stardewvalley/mods/5098)
+* Properly fixed selecting `random` for the first time on a save file
+
 ## 1.2
 Released 28 Dec 2020.
 
