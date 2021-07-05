@@ -652,7 +652,9 @@ namespace Gaphodil.BetterJukebox.Framework
             ChooseAction("random"); // NOTE: this will not include "typically removed" tracks even if enabled
             // above sets GameLocation.randomMiniJukeboxTrack.Value
             // vanilla bug(?): only happens IF miniJukeboxTrack is "random", which is set AFTER the randomize attempt is made
-            if (Game1.player.currentLocation.randomMiniJukeboxTrack.Value.Equals(""))
+
+            Netcode.NetString randomTrack = Game1.player.currentLocation.randomMiniJukeboxTrack;
+            if (randomTrack.Value is null || randomTrack.Value.Equals(""))
                 ChooseAction("random"); // do it again
             PlayingIndex = -1;
             IsRandom = true;
