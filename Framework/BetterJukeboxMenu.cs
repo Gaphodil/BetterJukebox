@@ -113,7 +113,7 @@ namespace Gaphodil.BetterJukebox.Framework
         private readonly Texture2D _BetterJukeboxGraphics;
 
         /// <summary>Whether internal music identifiers are displayed alongside the regular music name.</summary>
-        private readonly bool _showInternalID = false;
+        private readonly bool _showInternalId = false;
 
         /// <summary>The width of the menu.</summary>
         public const int w = 1050;
@@ -143,7 +143,7 @@ namespace Gaphodil.BetterJukebox.Framework
             Func<string, Translation> getTranslation,
             IMonitor monitor,
             string defaultSelection = "",
-            bool showInternalID = false)
+            bool showInternalId = false)
             : base (
                 Game1.uiViewport.Width  / 2 - (w + borderWidth * 2) / 2, // 1.5: switch from viewport to uiViewport
                 Game1.uiViewport.Height / 2 - (h + borderWidth * 2) / 2, 
@@ -159,7 +159,7 @@ namespace Gaphodil.BetterJukebox.Framework
             GetTranslation = getTranslation;
             Monitor = monitor;
 
-            _showInternalID = showInternalID;
+            _showInternalId = showInternalId;
 
             SelectedIndex = Options.IndexOf(defaultSelection);
             if (Game1.player.currentLocation.miniJukeboxTrack.Value.Equals("")) // no active mini-jukebox 
@@ -1059,10 +1059,9 @@ namespace Gaphodil.BetterJukebox.Framework
 
                 song_name = Utility.getSongTitleFromCueName(cue_name);
 
-                if (_showInternalID)    // left align song_name, right align cue_name
+                if (_showInternalId)    // left align song_name, right align cue_name
                 {
-                    if (cue_name.Equals(song_name))
-                        ;   // do nothing
+                    if (cue_name.Equals(song_name)) { }
                     else
                     {
                         Utility.drawTextWithShadow(
@@ -1140,8 +1139,7 @@ namespace Gaphodil.BetterJukebox.Framework
             }
 
             // draw the scrolling elements
-            if (VisibleOptions.Count >= Options.Count)
-                ; // do nothing
+            if (VisibleOptions.Count >= Options.Count) { }
             else
             {
                 UpArrow.draw(b);

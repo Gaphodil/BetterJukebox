@@ -21,14 +21,17 @@ namespace Gaphodil.BetterJukebox
         /// <summary>The mod configuration from the player.</summary>
         private ModConfig Config;
 
-        /// <summary>Whether internal music identifiers are displayed alongside the regular music name.</summary>
-        private bool ShowInternalID;
+        /// <summary>Internal music identifiers are displayed alongside the regular music name.</summary>
+        private bool ShowInternalId;
 
-        /// <summary>Whether ambience, sound effects, and other permanently disabled tracks show up in the jukebox.</summary>
+        /// <summary>Ambience, sound effects, and other permanently disabled tracks show up in the jukebox.</summary>
         private bool ShowAmbientTracks;
 
-        /// <summary>Whether only songs already heard on the save file can be found in the jukebox.</summary>
+        /// <summary>Songs not yet heard on the current save file can be found in the jukebox.</summary>
         //private bool ShowUnheardTracks;
+
+        /// <summary>Non-default sorting options are enabled.</summary>
+        //private bool ShowAlternateSorts;
 
         /*
          * Public methods
@@ -42,7 +45,7 @@ namespace Gaphodil.BetterJukebox
         {
             Config = helper.ReadConfig<ModConfig>();
 
-            ShowInternalID = Config.ShowInternalID;
+            ShowInternalId = Config.ShowInternalId;
             ShowAmbientTracks = Config.ShowAmbientTracks;
             //ShowUnheardTracks = Config.ShowUnheardTracks;
 
@@ -92,9 +95,9 @@ namespace Gaphodil.BetterJukebox
 
                 // this is the one change that isn't true to how the game does it, because it makes me angy >:L
                 int MTIndex = list.IndexOf("MainTheme");
-                if (MTIndex.Equals(0)) ;
+                if (MTIndex.Equals(0)) { }
                 else {
-                    if (MTIndex.Equals(-1)) ;
+                    if (MTIndex.Equals(-1)) { }
                     else list.RemoveAt(MTIndex);
                     list.Insert(0, "MainTheme"); 
                 }
@@ -113,7 +116,7 @@ namespace Gaphodil.BetterJukebox
                     key => Helper.Translation.Get(key),
                     Monitor,
                     Game1.player.currentLocation.miniJukeboxTrack.Value,
-                    ShowInternalID
+                    ShowInternalId
                 ); 
             }
         }
