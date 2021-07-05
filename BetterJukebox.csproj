@@ -49,6 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Framework\BetterJukeboxMenu.cs" />
+    <Compile Include="BetterJukeboxModConfigMenu.cs" />
+    <Compile Include="IGenericModConfigMenuApi.cs" />
     <Compile Include="Framework\ModConfig.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
