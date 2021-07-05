@@ -8,6 +8,7 @@ using StardewValley.Menus;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
+using GenericModConfigMenu;
 
 namespace Gaphodil.BetterJukebox
 {
@@ -21,14 +22,17 @@ namespace Gaphodil.BetterJukebox
         /// <summary>The mod configuration from the player.</summary>
         private ModConfig Config;
 
-        /// <summary>Whether internal music identifiers are displayed alongside the regular music name.</summary>
-        private bool ShowInternalID;
+        /// <summary>Internal music identifiers are displayed alongside the regular music name.</summary>
+        private bool ShowInternalId;
 
-        /// <summary>Whether ambience, sound effects, and other permanently disabled tracks show up in the jukebox.</summary>
+        /// <summary>Ambience, sound effects, and other permanently disabled tracks show up in the jukebox.</summary>
         private bool ShowAmbientTracks;
 
-        /// <summary>Whether only songs already heard on the save file can be found in the jukebox.</summary>
+        /// <summary>Songs not yet heard on the current save file can be found in the jukebox.</summary>
         //private bool ShowUnheardTracks;
+
+        /// <summary>Non-default sorting options are enabled.</summary>
+        //private bool ShowAlternateSorts;
 
         /*
          * Public methods
@@ -42,11 +46,8 @@ namespace Gaphodil.BetterJukebox
         {
             Config = helper.ReadConfig<ModConfig>();
 
-            ShowInternalID = Config.ShowInternalID;
-            ShowAmbientTracks = Config.ShowAmbientTracks;
-            //ShowUnheardTracks = Config.ShowUnheardTracks;
-
             helper.Events.Display.MenuChanged += OnMenuChanged;
+            helper.Events.GameLoop.GameLaunched += OnGameLaunched;
         }
 
 
@@ -59,8 +60,14 @@ namespace Gaphodil.BetterJukebox
         /// </summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event data.</param>
-        private void OnMenuChanged(object sender, MenuChangedEventArgs e) 
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
+            // get config values here to reflect potential changes via GenericModConfigMenu
+            ShowInternalId = Config.ShowInternalId;
+            ShowAmbientTracks = Config.ShowAmbientTracks;
+            //ShowUnheardTracks = Config.ShowUnheardTracks;
+            //ShowAlternateSorts = Config.ShowAlternateSorts;
+
             // replace ChooseFromListMenu (only used for jukeboxes as of 1.4) with BetterJukeboxMenu
             if (e.NewMenu is ChooseFromListMenu &&
                 Helper.Reflection.GetField<bool>(e.NewMenu, "isJukebox").GetValue() == true)
@@ -92,9 +99,9 @@ namespace Gaphodil.BetterJukebox
 
                 // this is the one change that isn't true to how the game does it, because it makes me angy >:L
                 int MTIndex = list.IndexOf("MainTheme");
-                if (MTIndex.Equals(0)) ;
+                if (MTIndex.Equals(0)) { }
                 else {
-                    if (MTIndex.Equals(-1)) ;
+                    if (MTIndex.Equals(-1)) { }
                     else list.RemoveAt(MTIndex);
                     list.Insert(0, "MainTheme"); 
                 }
@@ -113,9 +120,58 @@ namespace Gaphodil.BetterJukebox
                     key => Helper.Translation.Get(key),
                     Monitor,
                     Game1.player.currentLocation.miniJukeboxTrack.Value,
-                    ShowInternalID
+                    ShowInternalId
                 ); 
             }
+        }
+
+        // from https://github.com/spacechase0/StardewValleyMods/tree/develop/GenericModConfigMenu#readme
+        private void OnGameLaunched(object Sender, GameLaunchedEventArgs e)
+        {
+            // get Generic Mod Config Menu API (if it's installed)
+            var api = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            if (api is null)
+                return;
+
+            // register mod configuration
+            api.RegisterModConfig(
+                mod: ModManifest,
+                revertToDefault: () => Config = new ModConfig(),
+                saveToFile: () => Helper.WriteConfig(Config)
+            );
+
+            // let players configure your mod in-game (instead of just from the title screen)
+            api.SetDefaultIngameOptinValue(ModManifest, true);
+
+            // add some config options
+            api.RegisterSimpleOption(
+                mod: ModManifest,
+                optionName: "Show Internal ID",
+                optionDesc: "Internal music identifiers are displayed alongside the regular music name.",
+                optionGet: () => Config.ShowInternalId,
+                optionSet: value => Config.ShowInternalId = value
+            );
+            api.RegisterSimpleOption(
+                mod: ModManifest,
+                optionName: "Show Ambient Tracks",
+                optionDesc: "Ambience, sound effects, and other permanently disabled tracks show up in the jukebox.",
+                optionGet: () => Config.ShowAmbientTracks,
+                optionSet: value => Config.ShowAmbientTracks = value
+            );
+            //api.RegisterSimpleOption(
+            //    mod: this.ModManifest,
+            //    optionName: "Show Unheard Tracks",
+            //    optionDesc: "Songs not yet heard on the current save file can be found in the jukebox.",
+            //    optionGet: () => this.Config.ShowUnheardTracks,
+            //    optionSet: value => this.Config.ShowUnheardTracks = value
+            //);
+            //api.RegisterSimpleOption(
+            //    mod: this.ModManifest,
+            //    optionName: "Show Alternate Sorts",
+            //    optionDesc: "Non-default sorting options are enabled.",
+            //    optionGet: () => this.Config.ShowAlternateSorts,
+            //    optionSet: value => this.Config.ShowAlternateSorts = value
+            //);
         }
 
         /// <summary>
