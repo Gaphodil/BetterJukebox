@@ -68,13 +68,19 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <summary>The random button.</summary>
         public ClickableTextureComponent RandomButton;
 
+        /// <summary>The reverse sort order button.</summary>
+        public ClickableTextureComponent ReverseSortButton;
+
         /// <summary>The list of tabs, used for switching sorting methods.</summary>
         public List<ClickableTextureComponent> SortTabs = new List<ClickableTextureComponent>();
 
         /// <summary>The index of the currently selected tab.</summary>
         private int SelectedTab = 0;
-
         private readonly string ModDataTabKey = "6017/jukebox-tab";
+
+        /// <summary>The active-ness of the reverse sort.</summary>
+        private bool ReverseSort = false;
+        private readonly string ModDataReverseKey = "6017/jukebox-reverse";
 
         /// <summary>The text that displays when a tab is hovered over.</summary>
         private string HoverText;
@@ -87,6 +93,7 @@ namespace Gaphodil.BetterJukebox.Framework
         public const int UpArrowID = BaseID + 40;
         public const int DownArrowID = BaseID + 50;
         public const int TabsID = BaseID + 60;
+        public const int ReverseSortID = BaseID + 70;
 
         /// <summary>Whether the random option is currently active.</summary>
         private bool IsRandom = false;
@@ -223,6 +230,17 @@ namespace Gaphodil.BetterJukebox.Framework
                 Monitor.Log("Stored " + SelectedTab + " in modData!");
             }
 
+            if (Game1.player.modData.ContainsKey(ModDataReverseKey))
+            {
+                ReverseSort = bool.Parse(Game1.player.modData[ModDataReverseKey]);
+                Monitor.Log("Retrieved " + ReverseSort + " from modData!");
+            }
+            else
+            {
+                Game1.player.modData[ModDataReverseKey] = ReverseSort.ToString();
+                Monitor.Log("Stored " + ReverseSort + " in modData!");
+            }
+
             SortOptions();
 
             // setup ui
@@ -310,13 +328,35 @@ namespace Gaphodil.BetterJukebox.Framework
                     4f)
                 {
                     myID = RandomID,
-                    leftNeighborID = TabsID + SelectedTab, // whichever is currently active
+                    leftNeighborID = ReverseSortID,
                     rightNeighborID = PlayID,
                     downNeighborID = BaseID
                 };
             }
 
+            // set up reverse sort button
+            ReverseSortButton = new ClickableTextureComponent(
+                "reverse",
+                new Rectangle(
+                    xPositionOnScreen + borderWidth + spaceToClearSideBorder,
+                    yPositionOnScreen + _spacingPixels,
+                    16 * 4,
+                    16 * 4),
+                "",
+                null,
+                _BetterJukeboxGraphics,
+                new Rectangle((ReverseSort ? 16 : 0), 32, 16, 16),
+                4f)
+            {
+                myID = ReverseSortID,
+                leftNeighborID = TabsID + SelectedTab, // whichever is currently active
+                rightNeighborID = RandomID,
+                downNeighborID = BaseID
+            };
+
             // set up sorting tabs, positions from ShopMenu
+            // fix redraw bug
+            SortTabs.Clear();
             // default sort
             SortTabs.Add(new ClickableTextureComponent(
                 "ear",
@@ -332,7 +372,7 @@ namespace Gaphodil.BetterJukebox.Framework
                 4f)
             {
                 myID = TabsID,
-                rightNeighborID = RandomID,
+                rightNeighborID = ReverseSortID,
                 downNeighborID = TabsID + 1,
                 fullyImmutable = true
             });
@@ -351,7 +391,7 @@ namespace Gaphodil.BetterJukebox.Framework
                 4f)
             {
                 myID = TabsID + 1,
-                rightNeighborID = RandomID,
+                rightNeighborID = ReverseSortID,
                 upNeighborID = TabsID,
                 downNeighborID = TabsID + 2,
                 fullyImmutable = true
@@ -371,7 +411,7 @@ namespace Gaphodil.BetterJukebox.Framework
                 4f)
             {
                 myID = TabsID + 2,
-                rightNeighborID = RandomID,
+                rightNeighborID = ReverseSortID,
                 upNeighborID = TabsID + 1,
                 downNeighborID = TabsID + 3,
                 fullyImmutable = true
@@ -391,7 +431,7 @@ namespace Gaphodil.BetterJukebox.Framework
                 4f)
             {
                 myID = TabsID + 3,
-                rightNeighborID = RandomID,
+                rightNeighborID = ReverseSortID,
                 upNeighborID = TabsID + 2,
                 fullyImmutable = true
             });
@@ -534,6 +574,8 @@ namespace Gaphodil.BetterJukebox.Framework
             // remember player's selected sort in modData
             Game1.player.modData[ModDataTabKey] = SelectedTab.ToString();
             Monitor.Log("Stored " + SelectedTab + " in modData!");
+            Game1.player.modData[ModDataReverseKey] = ReverseSort.ToString();
+            Monitor.Log("Stored " + ReverseSort + " in modData!");
             // save last selected index
             if (SelectedIndex != PlayingIndex) SelectedIndex = PlayingIndex;
             string orig_cue = "";
@@ -553,6 +595,11 @@ namespace Gaphodil.BetterJukebox.Framework
                 case 3: // alphabetical by normal
                     Options.Sort();
                     break;
+            }
+            // uno reverse card
+            if (ReverseSort)
+            {
+                Options.Reverse();
             }
             // get index of new list
             if (SelectedIndex != -1 && !orig_cue.Equals(""))
@@ -709,16 +756,26 @@ namespace Gaphodil.BetterJukebox.Framework
                 PlayButtonPressed();
                 Game1.playSound("select");
             }
-            else if (StopButton != null && StopButton.containsPoint(x,y))
+            else if (!(StopButton is null) && StopButton.containsPoint(x,y))
             {
                 StopButtonPressed();
                 Game1.playSound("select");
             }
             // and now random button
-            else if (RandomButton != null && RandomButton.containsPoint(x,y))
+            else if (!(RandomButton is null) && RandomButton.containsPoint(x,y))
             {
                 RandomButtonPressed();
                 Game1.playSound("select");
+            }
+            // button reverse now and
+            else if (!(ReverseSortButton is null) && ReverseSortButton.containsPoint(x, y))
+            {
+                ReverseSort = !ReverseSort;
+                SortOptions();
+                UpdateVisibleOptions();
+                ReverseSortButton.sourceRect = new Rectangle((ReverseSort ? 16 : 0), 32, 16, 16);
+                SetScrollBarToLowestVisibleIndex();
+                Game1.playSound("shwip");
             }
 
             // option select (give 'em the mixup)
@@ -829,10 +886,13 @@ namespace Gaphodil.BetterJukebox.Framework
                 PlayButton.tryHover(x, y);
             StopButton?.tryHover(x, y);
             RandomButton?.tryHover(x, y, 0.2f); // works now!
-            // forgot about these
+
+            ReverseSortButton.tryHover(x, y);
+            if (ReverseSortButton.containsPoint(x, y))
+                HoverText = ReverseSort ? "Sort: Descending" : "Sort: Ascending";
+
             UpArrow.tryHover(x, y);
             DownArrow.tryHover(x, y);
-            // maybe this displays hovertext?
             for (int i = 0; i < SortTabs.Count; ++i)
             {
                 if (SortTabs[i].containsPoint(x, y))
@@ -1133,6 +1193,8 @@ namespace Gaphodil.BetterJukebox.Framework
                            0.99f);
                 }
             }
+            // and the reverse sort button
+            ReverseSortButton.draw(b);
 
             // draw the SortTabs
             for (int i = 0; i < SortTabs.Count; ++i)
