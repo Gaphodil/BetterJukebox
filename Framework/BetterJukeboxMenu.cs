@@ -603,6 +603,12 @@ namespace Gaphodil.BetterJukebox.Framework
                 }
                 // Monitor.Log(string.Format("VisibleOption {0} has baseID {1} and downNeighborID {2}",i, VisibleOptions[i].myID, VisibleOptions[i].downNeighborID));
             }
+            // no scrolling if EXACT length
+            if (Options.Count.Equals(_itemsPerPage))
+            {
+                UpArrow.myID = ClickableComponent.ID_ignore;
+                DownArrow.myID = ClickableComponent.ID_ignore;
+            }
         }
 
         /// <summary>Updates the ScrollBar to the current index.</summary>
