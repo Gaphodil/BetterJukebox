@@ -109,18 +109,18 @@ namespace Gaphodil.BetterJukebox.Framework
             "junimoKart_whaleMusic",
             "junimoKart_slimeMusic",
             "junimoKart_ghostMusic",
-            "junimoKart_mushroomMusic",
-            "IslandMusic",
-            "fieldofficeTentMusic",
-            "VolcanoMines",
-            "VolcanoMines1",
-            "VolcanoMines2",
-            "caldera",
-            "FrogCave",
-            "PIRATE_THEME",
-            "PIRATE_THEME(muffled)",
-            "sad_kid",
-            "end_credits"
+            "junimoKart_mushroomMusic"
+            //"IslandMusic",
+            //"fieldofficeTentMusic",
+            //"VolcanoMines",
+            //"VolcanoMines1",
+            //"VolcanoMines2",
+            //"caldera",
+            //"FrogCave",
+            //"PIRATE_THEME",
+            //"PIRATE_THEME(muffled)",
+            //"sad_kid",
+            //"end_credits"
         };
 
         // also used to determine locked tracks (minus cowboy)
@@ -228,18 +228,18 @@ namespace Gaphodil.BetterJukebox.Framework
             "junimoKart_whaleMusic",
             "junimoKart_slimeMusic",
             "junimoKart_ghostMusic",
-            "junimoKart_mushroomMusic",
-            "IslandMusic",
-            "fieldofficeTentMusic",
-            // "VolcanoMines",
-            "VolcanoMines1",
-            "VolcanoMines2",
-            "caldera",
-            "FrogCave",
-            "PIRATE_THEME",
-            "PIRATE_THEME(muffled)",
-            "sad_kid",
-            "end_credits"
+            "junimoKart_mushroomMusic"
+            //"IslandMusic",
+            //"fieldofficeTentMusic",
+            //// "VolcanoMines",
+            //"VolcanoMines1",
+            //"VolcanoMines2",
+            //"caldera",
+            //"FrogCave",
+            //"PIRATE_THEME",
+            //"PIRATE_THEME(muffled)",
+            //"sad_kid",
+            //"end_credits"
         };
 
         public static List<string> UnheardNamed = new List<string> {
@@ -254,8 +254,8 @@ namespace Gaphodil.BetterJukebox.Framework
             "springsongs",
             "EarthMine",
             "FrostMine",
-            "LavaMine",
-            "VolcanoMines"
+            "LavaMine"
+            //"VolcanoMines"
         };
 
         public static List<string> UnheardMisc = new List<string> {
@@ -273,8 +273,8 @@ namespace Gaphodil.BetterJukebox.Framework
             "Frost_Ambient",
             // "Ghost Synth",
             "Hospital_Ambient",
-            "jungle_ambience",
-            "Lava_Ambient",
+            //"jungle_ambience",
+            //"Lava_Ambient",
             // "Majestic",
             "Meteorite",
             "movieScreenAmbience",
@@ -294,9 +294,9 @@ namespace Gaphodil.BetterJukebox.Framework
             "stardrop",
             "summer_day_ambient",
             // "Tropical Jam",
-            "tropical_island_day_ambient",
+            //"tropical_island_day_ambient",
             "Upper_Ambient",
-            "Volcano_Ambient",
+            //"Volcano_Ambient",
             "winter_day_ambient"
         };
 

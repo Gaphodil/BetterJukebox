@@ -76,11 +76,11 @@ namespace Gaphodil.BetterJukebox.Framework
 
         /// <summary>The index of the currently selected tab.</summary>
         private int SelectedTab = 0;
-        private readonly string ModDataTabKey = "6017/jukebox-tab";
+        //private readonly string ModDataTabKey = "6017/jukebox-tab";
 
         /// <summary>The active-ness of the reverse sort.</summary>
         private bool ReverseSort = false;
-        private readonly string ModDataReverseKey = "6017/jukebox-reverse";
+        //private readonly string ModDataReverseKey = "6017/jukebox-reverse";
 
         /// <summary>The text that displays when a tab is hovered over.</summary>
         private string HoverText;
@@ -155,8 +155,8 @@ namespace Gaphodil.BetterJukebox.Framework
             ModConfig config,
             string defaultSelection = "")
             : base (
-                Game1.uiViewport.Width  / 2 - (init_w + borderWidth * 2) / 2, // 1.5: switch from viewport to uiViewport
-                Game1.uiViewport.Height / 2 - (h + borderWidth * 2) / 2, 
+                Game1.viewport.Width  / 2 - (init_w + borderWidth * 2) / 2,
+                Game1.viewport.Height / 2 - (h + borderWidth * 2) / 2, 
                 init_w + borderWidth * 2, 
                 h + borderWidth * 2,
                 true)
@@ -185,12 +185,12 @@ namespace Gaphodil.BetterJukebox.Framework
                 }
             }
             // new in 1.5: value is random
-            else if (Game1.player.currentLocation.miniJukeboxTrack.Value.Equals("random"))
-            {
-                PlayingIndex = -1;
-                Monitor.Log("Found active random mini-jukebox(es)!");
-                IsRandom = true;
-            }
+            //else if (Game1.player.currentLocation.miniJukeboxTrack.Value.Equals("random"))
+            //{
+            //    PlayingIndex = -1;
+            //    Monitor.Log("Found active random mini-jukebox(es)!");
+            //    IsRandom = true;
+            //}
             else
             {
                 PlayingIndex = SelectedIndex;
@@ -230,24 +230,24 @@ namespace Gaphodil.BetterJukebox.Framework
             // reorder options based on last sorting method
             if (Config.ShowAlternateSorts)
             {
-                if (Game1.player.modData.ContainsKey(ModDataTabKey))
-                {
-                    SelectedTab = int.Parse(Game1.player.modData[ModDataTabKey]);
-                    Monitor.Log("Retrieved SelectedTab " + SelectedTab + " from modData!");
-                }
-                if (Game1.player.modData.ContainsKey(ModDataReverseKey))
-                {
-                    ReverseSort = bool.Parse(Game1.player.modData[ModDataReverseKey]);
-                    Monitor.Log("Retrieved ReverseSort " + ReverseSort + " from modData!");
-                }
+                //if (Game1.player.modData.ContainsKey(ModDataTabKey))
+                //{
+                //    SelectedTab = int.Parse(Game1.player.modData[ModDataTabKey]);
+                //    Monitor.Log("Retrieved SelectedTab " + SelectedTab + " from modData!");
+                //}
+                //if (Game1.player.modData.ContainsKey(ModDataReverseKey))
+                //{
+                //    ReverseSort = bool.Parse(Game1.player.modData[ModDataReverseKey]);
+                //    Monitor.Log("Retrieved ReverseSort " + ReverseSort + " from modData!");
+                //}
 
                 SortOptions();
             }
 
             // copy from gameWindowSizeChanged
             this.width = w + borderWidth * 2;
-            this.xPositionOnScreen = Game1.uiViewport.Width  / 2 - (w + borderWidth * 2) / 2;
-            this.yPositionOnScreen = Game1.uiViewport.Height / 2 - (h + borderWidth * 2) / 2;
+            this.xPositionOnScreen = Game1.viewport.Width  / 2 - (w + borderWidth * 2) / 2;
+            this.yPositionOnScreen = Game1.viewport.Height / 2 - (h + borderWidth * 2) / 2;
             // setup ui
             SetUpPositions();
 
@@ -669,12 +669,12 @@ namespace Gaphodil.BetterJukebox.Framework
         private void SortOptions()
         {
             //Monitor.Log("calling sortoptions");
-            // remember player's selected sort in modData
-            Game1.player.modData[ModDataTabKey] = SelectedTab.ToString();
-            //Monitor.Log("Stored SelectedTab " + SelectedTab + " in modData!");
+            //// remember player's selected sort in modData
+            //Game1.player.modData[ModDataTabKey] = SelectedTab.ToString();
+            ////Monitor.Log("Stored SelectedTab " + SelectedTab + " in modData!");
             
-            Game1.player.modData[ModDataReverseKey] = ReverseSort.ToString();
-            //Monitor.Log("Stored ReverseSort " + ReverseSort + " in modData!");
+            //Game1.player.modData[ModDataReverseKey] = ReverseSort.ToString();
+            ////Monitor.Log("Stored ReverseSort " + ReverseSort + " in modData!");
 
             // save last selected index
             if (SelectedIndex != PlayingIndex)
@@ -859,16 +859,17 @@ namespace Gaphodil.BetterJukebox.Framework
             }
             else
             {
-                ChooseAction("random"); // NOTE: this will not include "typically removed" tracks even if enabled
-                // above sets GameLocation.randomMiniJukeboxTrack.Value
-                // vanilla bug(?): only happens IF miniJukeboxTrack is "random", which is set AFTER the randomize attempt is made
+                //ChooseAction("random"); // NOTE: this will not include "typically removed" tracks even if enabled
+                //// above sets GameLocation.randomMiniJukeboxTrack.Value
+                //// vanilla bug(?): only happens IF miniJukeboxTrack is "random", which is set AFTER the randomize attempt is made
 
-                Netcode.NetString randomTrack = Game1.player.currentLocation.randomMiniJukeboxTrack;
-                if (randomTrack.Value is null || randomTrack.Value.Equals(""))
-                    ChooseAction("random"); // do it again
-                PlayingIndex = -1;
-                IsRandom = true;
-                Monitor.Log("Random selected! Now playing: " + Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                //Netcode.NetString randomTrack = Game1.player.currentLocation.randomMiniJukeboxTrack;
+                //if (randomTrack.Value is null || randomTrack.Value.Equals(""))
+                //    ChooseAction("random"); // do it again
+                //PlayingIndex = -1;
+                //IsRandom = true;
+                //Monitor.Log("Random selected! Now playing: " + Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                Monitor.Log("Stardew 1.4 does not have a default random function!", LogLevel.Error);
             }
 
             // Game1.playSound("select");
@@ -1164,8 +1165,8 @@ namespace Gaphodil.BetterJukebox.Framework
             //base.gameWindowSizeChanged(oldBounds, newBounds);
             //xPositionOnScreen = newBounds.Width  / 2 - width  / 2; // tried to do it manually because I noticed a vanilla bug
             //yPositionOnScreen = newBounds.Height / 2 - height / 2; // turns out: this was worse!
-            this.xPositionOnScreen = Game1.uiViewport.Width / 2 - (w + borderWidth * 2) / 2; // maybe uiviewport updated???
-            this.yPositionOnScreen = Game1.uiViewport.Height / 2 - (h + borderWidth * 2) / 2;
+            this.xPositionOnScreen = Game1.viewport.Width / 2 - (w + borderWidth * 2) / 2;
+            this.yPositionOnScreen = Game1.viewport.Height / 2 - (h + borderWidth * 2) / 2;
 
             // refresh ui
             SetUpPositions();
@@ -1236,9 +1237,9 @@ namespace Gaphodil.BetterJukebox.Framework
                 song_name = GetSongTitle(Options[PlayingIndex].Name);
             else
             {
-                if (IsRandom)
-                    song_name = GetSongTitle(Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
-                else
+                //if (IsRandom)
+                //    song_name = GetSongTitle(Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                //else
                     song_name = Utility.getSongTitleFromCueName("turn_off");
             }
 

@@ -60,7 +60,7 @@
         /// <summary>
         /// Replace random function with menu items instead of only heard songs, but lose automatic shuffle on warp.
         /// </summary>
-        public bool TrueRandom { get; set; } = false;
+        public readonly bool TrueRandom = true;
 
         /// <summary>
         /// Non-default sorting options are enabled.

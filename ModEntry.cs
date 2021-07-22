@@ -186,7 +186,7 @@ namespace Gaphodil.BetterJukebox
             );
 
             // let players configure your mod in-game (instead of just from the title screen)
-            api.SetDefaultIngameOptinValue(ModManifest, true);
+            //api.SetDefaultIngameOptinValue(ModManifest, true);
 
             // add some config options
             api.RegisterSimpleOption(
@@ -196,26 +196,26 @@ namespace Gaphodil.BetterJukebox
                 optionGet: () => Config.ShowMenu,
                 optionSet: value => Config.ShowMenu = value
             );
-            api.RegisterPageLabel(
-                ModManifest,
-                Helper.Translation.Get("BetterJukebox:ListSettings"),
-                Helper.Translation.Get("BetterJukebox:ListSettingsDescription"),
-                Helper.Translation.Get("BetterJukebox:ListSettings")
-            );
-            api.RegisterPageLabel(
-                ModManifest,
-                Helper.Translation.Get("BetterJukebox:FunctionalSettings"),
-                Helper.Translation.Get("BetterJukebox:FunctionalSettingsDescription"),
-                Helper.Translation.Get("BetterJukebox:FunctionalSettings")
-            );
-            api.RegisterPageLabel(
-                ModManifest,
-                Helper.Translation.Get("BetterJukebox:VisualSettings"),
-                Helper.Translation.Get("BetterJukebox:VisualSettingsDescription"),
-                Helper.Translation.Get("BetterJukebox:VisualSettings")
-            );
+            //api.RegisterPageLabel(
+            //    ModManifest,
+            //    Helper.Translation.Get("BetterJukebox:ListSettings"),
+            //    Helper.Translation.Get("BetterJukebox:ListSettingsDescription"),
+            //    Helper.Translation.Get("BetterJukebox:ListSettings")
+            //);
+            //api.RegisterPageLabel(
+            //    ModManifest,
+            //    Helper.Translation.Get("BetterJukebox:FunctionalSettings"),
+            //    Helper.Translation.Get("BetterJukebox:FunctionalSettingsDescription"),
+            //    Helper.Translation.Get("BetterJukebox:FunctionalSettings")
+            //);
+            //api.RegisterPageLabel(
+            //    ModManifest,
+            //    Helper.Translation.Get("BetterJukebox:VisualSettings"),
+            //    Helper.Translation.Get("BetterJukebox:VisualSettingsDescription"),
+            //    Helper.Translation.Get("BetterJukebox:VisualSettings")
+            //);
 
-            api.StartNewPage(ModManifest, Helper.Translation.Get("BetterJukebox:ListSettings"));
+            //api.StartNewPage(ModManifest, Helper.Translation.Get("BetterJukebox:ListSettings"));
             api.RegisterClampedOption(
                 mod: ModManifest,
                 optionName: Helper.Translation.Get("BetterJukebox:AmbientTracks"),
@@ -223,8 +223,8 @@ namespace Gaphodil.BetterJukebox
                 optionGet: () => Config.AmbientTracks,
                 optionSet: value => Config.AmbientTracks = value,
                 min: 0,
-                max: 2,
-                interval: 1
+                max: 2
+                //interval: 1
             );
             api.RegisterSimpleOption(
                 mod: ModManifest,
@@ -311,14 +311,14 @@ namespace Gaphodil.BetterJukebox
                 optionSet: value => Config.PermanentBlacklist = value
             );
 
-            api.StartNewPage(ModManifest, Helper.Translation.Get("BetterJukebox:FunctionalSettings"));
-            api.RegisterSimpleOption(
-                mod: ModManifest,
-                optionName: Helper.Translation.Get("BetterJukebox:TrueRandom"),
-                optionDesc: Helper.Translation.Get("BetterJukebox:TrueRandomDescription"),
-                optionGet: () => Config.TrueRandom,
-                optionSet: value => Config.TrueRandom = value
-            );
+            //api.StartNewPage(ModManifest, Helper.Translation.Get("BetterJukebox:FunctionalSettings"));
+            //api.RegisterSimpleOption(
+            //    mod: ModManifest,
+            //    optionName: Helper.Translation.Get("BetterJukebox:TrueRandom"),
+            //    optionDesc: Helper.Translation.Get("BetterJukebox:TrueRandomDescription"),
+            //    optionGet: () => Config.TrueRandom,
+            //    optionSet: value => Config.TrueRandom = value
+            //);
             api.RegisterSimpleOption(
                 mod: ModManifest,
                 optionName: Helper.Translation.Get("BetterJukebox:ShowAlternateSorts"),
@@ -327,7 +327,7 @@ namespace Gaphodil.BetterJukebox
                 optionSet: value => Config.ShowAlternateSorts = value
             );
 
-            api.StartNewPage(ModManifest, Helper.Translation.Get("BetterJukebox:VisualSettings"));
+            //api.StartNewPage(ModManifest, Helper.Translation.Get("BetterJukebox:VisualSettings"));
             api.RegisterSimpleOption(
                 mod: ModManifest,
                 optionName: Helper.Translation.Get("BetterJukebox:ShowInternalId"),
