@@ -1,7 +1,7 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
-## 1.3.0
+## 1.3.1
 Released 22 Jul 2021.
 
 * Fixed minor bug with snappy menus when option count is equal to maximum displayable
