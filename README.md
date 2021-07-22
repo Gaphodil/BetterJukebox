@@ -15,7 +15,7 @@ These are the available settings:
 
 | General settings      | what it does
 | ---                   | ---
-| `ShowMenu`            | Show the menu. When disabled, only permanent list settings will apply.
+| `ShowMenu`            | Default `true`. Show the menu. When disabled, only permanent list settings will apply.
 
 | List settings		    | what it does
 | ---					| --- 
