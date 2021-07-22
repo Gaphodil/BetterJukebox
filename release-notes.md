@@ -2,6 +2,11 @@
 
 # Release notes
 ## 1.3.0
+Released 22 Jul 2021.
+
+* Fixed minor bug with snappy menus when option count is equal to maximum displayable
+
+## 1.3.0
 Released 21 Jul 2021.
 
 * Added sort by soundtrack order
