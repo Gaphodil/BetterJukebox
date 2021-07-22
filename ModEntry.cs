@@ -20,9 +20,6 @@ namespace Gaphodil.BetterJukebox
          */
 
         /// <summary>The mod configuration from the player.</summary>
-
-        /// <summary>Ambience, sound effects, and other permanently disabled tracks show up in the jukebox.</summary>
-        private bool ShowAmbientTracks;
         public ModConfig Config;
 
         /*
@@ -38,13 +35,62 @@ namespace Gaphodil.BetterJukebox
             Config = helper.ReadConfig<ModConfig>();
 
             helper.Events.Display.MenuChanged += OnMenuChanged;
+            helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
         }
-
 
         /*
          * Private methods
          */
+
+        /// <summary>
+        /// Raised after loading a save.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
+            //Monitor.Log("all heard:\t" + string.Join(", ",Game1.player.songsHeard.ToArray()));
+            if (Config.PermanentUnheard)
+            {
+                // there was "don't repeat if already done"
+                // but it's gone now (because i added permanent blacklist)
+
+                if (Config.ShowUnheardTracks)
+                {
+                    BetterJukeboxHelper.AddUnheardTracks(
+                        Game1.player.songsHeard,
+                        Config.UnheardSoundtrack,
+                        Config.UnheardNamed,
+                        Config.UnheardRandom,
+                        Config.UnheardMisc,
+                        Config.UnheardDupes,
+                        Config.UnheardMusical
+                    );
+                }
+
+                //Game1.player.songsHeard.Remove("title_day"); // readded at every save load, so...
+                int MTIndex = Game1.player.songsHeard.IndexOf("MainTheme");
+                if (MTIndex.Equals(0) || MTIndex.Equals(-1)) { }
+                else
+                {
+                    Game1.player.songsHeard.RemoveAt(MTIndex);
+                    Game1.player.songsHeard.Insert(0, "MainTheme");
+                }
+
+                Monitor.Log("permanentBlacklist: " + Config.PermanentBlacklist);
+                Monitor.Log("permanentBlacklist converted: " + new FilterListConfig(Config.PermanentBlacklist));
+                FilterListConfig blacklist = new FilterListConfig(Config.PermanentBlacklist);
+                List<string> toRemove = blacklist.content.Distinct().ToList();
+                if (toRemove.Count > 0)
+                {
+                    foreach (string cue in toRemove)
+                    {
+                        Game1.player.songsHeard.Remove(cue);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Raised after a game menu is opened, closed, or replaced. 
@@ -53,9 +99,9 @@ namespace Gaphodil.BetterJukebox
         /// <param name="e">The event data.</param>
         private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            ShowAmbientTracks = Config.ShowAmbientTracks;
             // replace ChooseFromListMenu (only used for jukeboxes as of 1.4) with BetterJukeboxMenu
-            if (e.NewMenu is ChooseFromListMenu &&
+            if (Config.ShowMenu &&
+                e.NewMenu is ChooseFromListMenu &&
                 Helper.Reflection.GetField<bool>(e.NewMenu, "isJukebox").GetValue() == true)
             {
                 ChooseFromListMenu.actionOnChoosingListOption action = 
@@ -66,34 +112,47 @@ namespace Gaphodil.BetterJukebox
                 // create default list of songs to play - apparently this is how CA hard-copied the list
                 List<string> list = Game1.player.songsHeard.Distinct().ToList();
 
-                //if (ShowUnheardTracks)
-                //{
-                //    AddAllTracks(list);
-                //}
-
-                // from ChooseFromListMenu constructor
-                if (!ShowAmbientTracks)
+                // add unheard tracks
+                if (Config.ShowUnheardTracks && !Config.PermanentUnheard)
                 {
-                    RemoveAmbience(list);
+                    BetterJukeboxHelper.AddUnheardTracks(
+                        list,
+                        Config.UnheardSoundtrack,
+                        Config.UnheardNamed,
+                        Config.UnheardRandom,
+                        Config.UnheardMisc,
+                        Config.UnheardDupes,
+                        Config.UnheardMusical
+                    );
                 }
-                //else  // rain noises heavily based on actual weather and player location, no effect if not raining
-                //{
-                //    if (list.IndexOf("rain") == -1)
-                //        list.Add("rain");
-                //}
+
+                // remove specific tracks
+                BetterJukeboxHelper.FilterTracksFromList(list, Config.AmbientTracks, Config.Blacklist, Config.Whitelist);
+
                 list.Remove("title_day"); // this one gets removed for A Good Reason, apparently
 
                 // this is the one change that isn't true to how the game does it, because it makes me angy >:L
                 int MTIndex = list.IndexOf("MainTheme");
-                if (MTIndex.Equals(0)) { }
-                else {
+                // if permanent: not -1
+                // if not permanent: -1
+                // if in either blacklist: -1
+                // impossible to tell directly, can't put into filtertracks because need to check both
+                bool isMTPermanentBlacklisted = new FilterListConfig(Config.PermanentBlacklist).content.Contains("MainTheme");
+                bool isMTRegularBlacklisted = new FilterListConfig(Config.Blacklist).content.Contains("MainTheme");
+
+                if (!isMTPermanentBlacklisted &&
+                    !isMTRegularBlacklisted &&
+                    !MTIndex.Equals(0))
+                {
                     if (MTIndex.Equals(-1)) { }
-                    else list.RemoveAt(MTIndex);
+                    else
+                        list.RemoveAt(MTIndex);
                     list.Insert(0, "MainTheme"); 
                 }
 
                 // speculative fix for Nexus page bug report
                 list.Remove("resetVariable");
+
 
                 // create and activate the menu
                 Game1.activeClickableMenu = new BetterJukeboxMenu(
@@ -285,46 +344,5 @@ namespace Gaphodil.BetterJukebox
             );
         }
 
-        /// <summary>
-        /// Remove ambient tracks from the list of songs available in the jukebox.
-        /// Copied from the ChooseFromListMenu constructor.
-        /// </summary>
-        /// <param name="trackList"></param>
-        private void RemoveAmbience(List<string> trackList)
-        {
-            for (int index = trackList.Count - 1; index >= 0; --index)
-            {
-                if (trackList[index].ToLower().Contains("ambient") || trackList[index].ToLower().Contains("bigdrums") || trackList[index].ToLower().Contains("clubloop") || trackList[index].ToLower().Contains("ambience"))
-                {
-                    trackList.RemoveAt(index);
-                }
-                else
-                {
-                    switch (trackList[index])
-                    {
-                        case "buglevelloop": // vanilla bug: should be "bugLevelLoop"
-                            trackList.RemoveAt(index);
-                            continue;
-                        case "coin":
-                            trackList.RemoveAt(index);
-                            continue;
-                        case "communityCenter":
-                            trackList.RemoveAt(index);
-                            continue;
-                        case "jojaOfficeSoundscape":
-                            trackList.RemoveAt(index);
-                            continue;
-                        case "nightTime":
-                            trackList.RemoveAt(index);
-                            continue;
-                        case "ocean":
-                            trackList.RemoveAt(index);
-                            continue;
-                        default:
-                            continue;
-                    }
-                }
-            }
-        }
     }
 }
