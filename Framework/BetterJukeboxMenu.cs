@@ -119,8 +119,6 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <summary>The play and stop button graphics as a tilesheet.</summary>
         private readonly Texture2D _BetterJukeboxGraphics;
 
-        /// <summary>Whether internal music identifiers are displayed alongside the regular music name.</summary>
-        private readonly bool _showInternalId = false;
 
         /// <summary>The width of the menu.</summary>
         public const int w = 1050;
@@ -136,6 +134,9 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <summary>The SMAPI Monitor for logging messages.</summary>
         private readonly IMonitor Monitor;
 
+        /// <summary></summary>
+        private readonly ModConfig Config;
+
         /**************** 
          * Public methods
          ****************/
@@ -149,8 +150,8 @@ namespace Gaphodil.BetterJukebox.Framework
             Texture2D graphics,
             Func<string, Translation> getTranslation,
             IMonitor monitor,
-            string defaultSelection = "",
-            bool showInternalId = false)
+            ModConfig config,
+            string defaultSelection = "")
             : base (
                 Game1.uiViewport.Width  / 2 - (w + borderWidth * 2) / 2, // 1.5: switch from viewport to uiViewport
                 Game1.uiViewport.Height / 2 - (h + borderWidth * 2) / 2, 
@@ -165,8 +166,8 @@ namespace Gaphodil.BetterJukebox.Framework
             _BetterJukeboxGraphics = graphics;
             GetTranslation = getTranslation;
             Monitor = monitor;
+            Config = config;
 
-            _showInternalId = showInternalId;
 
             SelectedIndex = Options.IndexOf(defaultSelection);
             if (Game1.player.currentLocation.miniJukeboxTrack.Value.Equals("")) // no active mini-jukebox 
@@ -1121,10 +1122,10 @@ namespace Gaphodil.BetterJukebox.Framework
 
                 song_name = Utility.getSongTitleFromCueName(cue_name);
 
-                if (_showInternalId)    // left align song_name, right align cue_name
                 {
                     if (cue_name.Equals(song_name)) { }
                     else
+                    if (Config.ShowInternalId)    // left align song_name, right align cue_name
                     {
                         Utility.drawTextWithShadow(
                             b,
