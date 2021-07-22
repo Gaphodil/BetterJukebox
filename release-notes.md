@@ -1,6 +1,23 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
+## 1.3.0
+Released 21 Jul 2021.
+
+* Added sort by soundtrack order
+* Added reverse current sort
+* Added settings to:
+    * show unheard tracks from various different categories
+        * optionally unlock unheard tracks permanently on a save file
+        * disable menu to use only permanent additions
+    * show or hide tracks from the list using a combination of presets/a blacklist/a whitelist
+    * show unheard songs as locked
+    * choose random songs from the displayed list instead of heard tracks
+    * use Bandcamp song names
+    * hide alternate sorts
+* Moved a large number of strings to i18n for potential translation support
+* Update redraw on window size change (again)
+
 ## 1.2.1
 Released 05 Jul 2021.
 
