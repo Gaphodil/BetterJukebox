@@ -1,6 +1,17 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
+## 2.0.0 (upcoming)
+Releases soon.
+
+* Migration to Stardew 1.6 and SMAPI 4.0.0
+ 
+## 1.3.3
+Released 06 Nov 2023.
+
+* Maybe fixes a crash with getting Bandcamp song titles (maybe)
+* Partial preparation for SMAPI and GMCM deprecation warnings
+
 ## 1.3.2
 Released 16 Aug 2021.
 
