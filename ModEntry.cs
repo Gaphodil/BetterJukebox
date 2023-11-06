@@ -1,14 +1,13 @@
-﻿using System;
 using Gaphodil.BetterJukebox.Framework;
-using Microsoft.Xna.Framework;
-using StardewModdingAPI;
+using GenericModConfigMenu;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
-using StardewValley;
+using StardewModdingAPI.Utilities;
+using StardewModdingAPI;
 using StardewValley.Menus;
+using StardewValley;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework.Graphics;
-using GenericModConfigMenu;
 
 namespace Gaphodil.BetterJukebox
 {
@@ -80,7 +79,7 @@ namespace Gaphodil.BetterJukebox
 
                 Monitor.Log("permanentBlacklist: " + Config.PermanentBlacklist);
                 Monitor.Log("permanentBlacklist converted: " + new FilterListConfig(Config.PermanentBlacklist));
-                FilterListConfig blacklist = new FilterListConfig(Config.PermanentBlacklist);
+                FilterListConfig blacklist = new(Config.PermanentBlacklist);
                 List<string> toRemove = blacklist.content.Distinct().ToList();
                 if (toRemove.Count > 0)
                 {
@@ -153,14 +152,15 @@ namespace Gaphodil.BetterJukebox
                 // speculative fix for Nexus page bug report
                 list.Remove("resetVariable");
 
+                // 1.5.5 asset loading consistency (also it may not have worked off windows anyways)
+                string graphicsKey = PathUtilities.NormalizeAssetName("assets/BetterJukeboxGraphics.png");
 
                 // create and activate the menu
                 Game1.activeClickableMenu = new BetterJukeboxMenu(
                     list,
                     new BetterJukeboxMenu.actionOnChoosingListOption(action),
-                    Helper.Content.Load<Texture2D>(
-                        "assets/BetterJukeboxGraphics.png",
-                        ContentSource.ModFolder
+                    Helper.ModContent.Load<Texture2D>( // 1.6 compatibility
+                        graphicsKey
                     ),
                     key => Helper.Translation.Get(key),
                     Monitor,

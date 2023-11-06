@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Gaphodil.BetterJukebox.Framework
 {
@@ -15,9 +11,9 @@ namespace Gaphodil.BetterJukebox.Framework
             content = ToList(s);
         }
 
-        private List<string> ToList(string s)
+        private static List<string> ToList(string s)
         {
-            List<string> l = new List<string> (s.Split(','));
+            List<string> l = new(s.Split(','));
             for (int i = 0; i < l.Count; i++)
             {
                 l[i] = l[i].Trim();

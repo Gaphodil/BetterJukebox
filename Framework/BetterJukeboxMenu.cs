@@ -19,7 +19,7 @@ namespace Gaphodil.BetterJukebox.Framework
         // ---- The parts from ShopMenu:
 
         /// <summary>The list of visible options to choose from.</summary>
-        public List<ClickableComponent> VisibleOptions = new List<ClickableComponent>();
+        public List<ClickableComponent> VisibleOptions = new();
 
         /// <summary>The scroll-up button.</summary>
         public ClickableTextureComponent UpArrow;
@@ -39,7 +39,7 @@ namespace Gaphodil.BetterJukebox.Framework
         // ---- The parts from ChooseFromListMenu:
 
         /// <summary>The list of songs to display.</summary>
-        private readonly List<BetterJukeboxItem> Options = new List<BetterJukeboxItem>();
+        private readonly List<BetterJukeboxItem> Options = new();
 
         /// <summary>The index of the currently active selection from the Options.</summary>
         private int SelectedIndex;
@@ -48,7 +48,7 @@ namespace Gaphodil.BetterJukebox.Framework
         private int LowestVisibleIndex;
 
         /// <summary>The method that will be called when a button is pressed.</summary>
-        private readonly BetterJukeboxMenu.actionOnChoosingListOption ChooseAction;
+        private readonly actionOnChoosingListOption ChooseAction;
 
         // ---- Other parts:
 
@@ -72,7 +72,7 @@ namespace Gaphodil.BetterJukebox.Framework
         public ClickableTextureComponent ReverseSortButton;
 
         /// <summary>The list of tabs, used for switching sorting methods.</summary>
-        public List<ClickableTextureComponent> SortTabs = new List<ClickableTextureComponent>();
+        public List<ClickableTextureComponent> SortTabs = new();
 
         /// <summary>The index of the currently selected tab.</summary>
         private int SelectedTab = 0;
@@ -148,7 +148,7 @@ namespace Gaphodil.BetterJukebox.Framework
         /// <param name="chooseAction">The method that will be called when a button is pressed.</param>
         public BetterJukeboxMenu(
             List<string> options,
-            BetterJukeboxMenu.actionOnChoosingListOption chooseAction,
+            actionOnChoosingListOption chooseAction,
             Texture2D graphics,
             Func<string, Translation> getTranslation,
             IMonitor monitor,
@@ -267,7 +267,7 @@ namespace Gaphodil.BetterJukebox.Framework
         {
             //Monitor.Log("calling setup");
             // avoid drawing stop and random button in Saloon
-            bool isSaloon = Game1.player.currentLocation.name.Equals("Saloon");
+            bool isSaloon = Game1.player.currentLocation.Name.Equals("Saloon");
             bool hideRandom = isSaloon && !Config.TrueRandom;
             //Monitor.Log("saloon:\t" + isSaloon.ToString());
             //Monitor.Log("truerandom:\t" + Config.TrueRandom.ToString());
@@ -571,7 +571,7 @@ namespace Gaphodil.BetterJukebox.Framework
                     if (options_index >= Options.Count) // of course this needs to be called on the first iteration! don't forget next time!!!
                     {
                         VisibleOptions[i].myID = ClickableComponent.ID_ignore; // these ids should only need to be changed on sort
-                        if (!(UpArrow is null) && UpArrow.myID.Equals(UpArrowID))
+                        if (UpArrow is not null && UpArrow.myID.Equals(UpArrowID))
                         {
                             UpArrow.myID = ClickableComponent.ID_ignore;
                             DownArrow.myID = ClickableComponent.ID_ignore;
@@ -778,7 +778,7 @@ namespace Gaphodil.BetterJukebox.Framework
         /// Used as a poor workaround for differentiating the Saloon jukebox from mini-jukeboxes.
         /// </summary>
         /// <returns>the number of mini-jukeboxes in the current location</returns>
-        private int GetNumberOfLocalMiniJukeboxes()
+        private static int GetNumberOfLocalMiniJukeboxes()
         {
             return Game1.player.currentLocation.miniJukeboxCount.Value;
         }
@@ -927,19 +927,19 @@ namespace Gaphodil.BetterJukebox.Framework
                 PlayButtonPressed();
                 Game1.playSound("select");
             }
-            else if (!(StopButton is null) && StopButton.containsPoint(x,y))
+            else if (StopButton is not null && StopButton.containsPoint(x, y))
             {
                 StopButtonPressed();
                 Game1.playSound("select");
             }
             // and now random button
-            else if (!(RandomButton is null) && RandomButton.containsPoint(x,y))
+            else if (RandomButton is not null && RandomButton.containsPoint(x, y))
             {
                 RandomButtonPressed();
                 Game1.playSound("select");
             }
             // button reverse now and
-            else if (!(ReverseSortButton is null) && ReverseSortButton.containsPoint(x, y))
+            else if (ReverseSortButton is not null && ReverseSortButton.containsPoint(x, y))
             {
                 ReverseSort = !ReverseSort;
                 SortOptions();

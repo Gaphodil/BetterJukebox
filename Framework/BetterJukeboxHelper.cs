@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gaphodil.BetterJukebox.Framework
 {
     static class BetterJukeboxHelper
     {
-        public static List<string> SoundtrackOrderIds = new List<string>{
+        public static List<string> SoundtrackOrderIds = new()
+        {
             "title_day",
             "MainTheme",
             "CloudCountry",
@@ -124,7 +122,8 @@ namespace Gaphodil.BetterJukebox.Framework
         };
 
         // also used to determine locked tracks (minus cowboy)
-        public static List<string> UnheardSoundtrack = new List<string> {
+        public static List<string> UnheardSoundtrack = new()
+        {
             // "title_day",
             "MainTheme",
             "CloudCountry",
@@ -242,7 +241,8 @@ namespace Gaphodil.BetterJukebox.Framework
             "end_credits"
         };
 
-        public static List<string> UnheardNamed = new List<string> {
+        public static List<string> UnheardNamed = new()
+        {
             "aerobics",
             "bugLevelLoop",
             "jojaOfficeSoundscape",
@@ -250,7 +250,8 @@ namespace Gaphodil.BetterJukebox.Framework
             "starshoot",
         };
 
-        public static List<string> UnheardRandom = new List<string> {
+        public static List<string> UnheardRandom = new()
+        {
             "springsongs",
             "EarthMine",
             "FrostMine",
@@ -258,7 +259,8 @@ namespace Gaphodil.BetterJukebox.Framework
             "VolcanoMines"
         };
 
-        public static List<string> UnheardMisc = new List<string> {
+        public static List<string> UnheardMisc = new()
+        {
             // "springsongs",
             // "EarthMine",
             // "FrostMine",
@@ -300,7 +302,8 @@ namespace Gaphodil.BetterJukebox.Framework
             "winter_day_ambient"
         };
 
-        public static List<string> UnheardDupes = new List<string> {
+        public static List<string> UnheardDupes = new()
+        {
             "Cyclops",
             "Ghost Synth",
             "Majestic",
@@ -311,7 +314,8 @@ namespace Gaphodil.BetterJukebox.Framework
             "Tropical Jam"
         };
         
-        public static List<string> UnheardMusical = new List<string> {
+        public static List<string> UnheardMusical = new()
+        {
             "aerobics",
             "starshoot",
             "archaeo",
@@ -350,20 +354,10 @@ namespace Gaphodil.BetterJukebox.Framework
                     switch (trackList[index])
                     {
                         case "buglevelloop": // vanilla bug: should be "bugLevelLoop"
-                            trackList.RemoveAt(index);
-                            continue;
                         case "coin":
-                            trackList.RemoveAt(index);
-                            continue;
                         case "communityCenter":
-                            trackList.RemoveAt(index);
-                            continue;
                         case "jojaOfficeSoundscape":
-                            trackList.RemoveAt(index);
-                            continue;
                         case "nightTime":
-                            trackList.RemoveAt(index);
-                            continue;
                         case "ocean":
                             trackList.RemoveAt(index);
                             continue;
@@ -426,8 +420,8 @@ namespace Gaphodil.BetterJukebox.Framework
 
         public static void FilterTracksFromList(List<string> trackList, int ambienceType, string config_blist = "", string config_wlist = "")
         {
-            FilterListConfig blacklist = new FilterListConfig(config_blist);
-            FilterListConfig whitelist = new FilterListConfig(config_wlist);
+            FilterListConfig blacklist = new(config_blist);
+            FilterListConfig whitelist = new(config_wlist);
 
             switch (ambienceType)
             {
