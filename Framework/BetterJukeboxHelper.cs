@@ -550,6 +550,8 @@ namespace Gaphodil.BetterJukebox.Framework
                 case "junimoKart_mushroomMusic":
                 case "end_credits":
                     return GetTranslation("BetterJukebox:" + cue);
+                default:
+                    break;
             }
             return "";
         }
