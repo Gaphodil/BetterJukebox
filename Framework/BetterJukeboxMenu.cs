@@ -153,6 +153,7 @@ namespace Gaphodil.BetterJukebox.Framework
             Func<string, Translation> getTranslation,
             IMonitor monitor,
             ModConfig config,
+            bool isSaloon,
             string defaultSelection = "")
             : base (
                 Game1.uiViewport.Width  / 2 - (init_w + borderWidth * 2) / 2, // 1.5: switch from viewport to uiViewport
@@ -172,7 +173,7 @@ namespace Gaphodil.BetterJukebox.Framework
 
             if (Game1.player.currentLocation.miniJukeboxTrack.Value.Equals("")) // no active mini-jukebox 
             {
-                if (Game1.startedJukeboxMusic) // hypothetically only ever true in the saloon
+                if (isSaloon) // 1.6: startedJukeboxMusic removed, workaround
                 {
                     PlayingIndex = Options.FindIndex(item => item.Name.Equals(Game1.getMusicTrackName()));
                     SelectedIndex = PlayingIndex;
@@ -185,6 +186,7 @@ namespace Gaphodil.BetterJukebox.Framework
                 }
             }
             // new in 1.5: value is random
+            // may not be reachable in 1.6
             else if (Game1.player.currentLocation.miniJukeboxTrack.Value.Equals("random"))
             {
                 PlayingIndex = -1;
@@ -864,16 +866,23 @@ namespace Gaphodil.BetterJukebox.Framework
             }
             else
             {
-                ChooseAction("random"); // NOTE: this will not include "typically removed" tracks even if enabled
-                // above sets GameLocation.randomMiniJukeboxTrack.Value
+                ChooseAction("random"); 
+                // NOTE: this will not include "typically removed" tracks even if enabled
+                // pre-1.6: above sets GameLocation.randomMiniJukeboxTrack.Value
                 // vanilla bug(?): only happens IF miniJukeboxTrack is "random", which is set AFTER the randomize attempt is made
 
-                Netcode.NetString randomTrack = Game1.player.currentLocation.randomMiniJukeboxTrack;
-                if (randomTrack.Value is null || randomTrack.Value.Equals(""))
-                    ChooseAction("random"); // do it again
+                //Netcode.NetString randomTrack = Game1.player.currentLocation.randomMiniJukeboxTrack;
+                //if (randomTrack.Value is null || randomTrack.Value.Equals(""))
+                //    ChooseAction("random"); // do it again
+
+                // post-1.6: randomization changed heavily
                 PlayingIndex = -1;
-                IsRandom = true;
-                Monitor.Log("Random selected! Now playing: " + Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                IsRandom = true; // leaving unchanged in hope for the future
+                // though now there is a minor visual bug when random pressed
+
+                // 1.6 change prevents getting the song title after random without closing the menu first
+                //Monitor.Log("Random selected! Now playing: " + Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                Monitor.Log("Random selected!");
             }
 
             // Game1.playSound("select");
@@ -1242,7 +1251,8 @@ namespace Gaphodil.BetterJukebox.Framework
             else
             {
                 if (IsRandom)
-                    song_name = GetSongTitle(Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                    //song_name = GetSongTitle(Game1.player.currentLocation.randomMiniJukeboxTrack.Value);
+                    song_name = GetSongTitle(Game1.player.currentLocation.miniJukeboxTrack.Value);
                 else
                     song_name = Utility.getSongTitleFromCueName("turn_off");
             }
@@ -1406,6 +1416,7 @@ namespace Gaphodil.BetterJukebox.Framework
                 else
                 {
                     // draw check/cross
+                    // 1.6 leaving in for now
                     if (IsRandom)
                     {
                         b.Draw(

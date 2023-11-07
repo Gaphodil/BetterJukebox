@@ -450,7 +450,8 @@ namespace Gaphodil.BetterJukebox.Framework
             }
         }
 
-        public static void AddUnheardTracks(List<string> trackList, bool soundtrack, bool named, bool random, bool misc, bool dupes, bool musical)
+        // from List to HashSet
+        public static void AddUnheardTracks(HashSet<string> trackList, bool soundtrack, bool named, bool random, bool misc, bool dupes, bool musical)
         {
             // O(n^2) every time oh yeah
             if (soundtrack)
@@ -467,16 +468,17 @@ namespace Gaphodil.BetterJukebox.Framework
                 AddOneListIteratively(trackList, UnheardMusical);
         }
 
-        public static void AddOneListIteratively(List<string> trackList, List<string> toAdd)
+        public static void AddOneListIteratively(HashSet<string> trackList, List<string> toAdd)
         {
             string track;
             for (int i = 0; i < toAdd.Count; i++)
             {
                 track = toAdd[i];
-                if (trackList.IndexOf(track).Equals(-1))
+                /*if (trackList.IndexOf(track).Equals(-1))
                 {
                     trackList.Add(track);
-                }
+                }*/
+                trackList.Add(track); // no duplication prevention necessary here
             }
         }
 
