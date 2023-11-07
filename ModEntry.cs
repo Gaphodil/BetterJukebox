@@ -69,13 +69,7 @@ namespace Gaphodil.BetterJukebox
                 }
 
                 //Game1.player.songsHeard.Remove("title_day"); // readded at every save load, so...
-                int MTIndex = Game1.player.songsHeard.IndexOf("MainTheme");
-                if (MTIndex.Equals(0) || MTIndex.Equals(-1)) { }
-                else
-                {
-                    Game1.player.songsHeard.RemoveAt(MTIndex);
-                    Game1.player.songsHeard.Insert(0, "MainTheme");
-                }
+                // 1.6: list to hashset means changing maintheme location unnecessary
 
                 Monitor.Log("permanentBlacklist: " + Config.PermanentBlacklist);
                 Monitor.Log("permanentBlacklist converted: " + new FilterListConfig(Config.PermanentBlacklist));
@@ -105,17 +99,21 @@ namespace Gaphodil.BetterJukebox
             {
                 ChooseFromListMenu.actionOnChoosingListOption action = 
                     Helper.Reflection.GetField<ChooseFromListMenu.actionOnChoosingListOption>(e.NewMenu, "chooseAction").GetValue();
+
+                // easy 1.6 saloon bool
+                bool isSaloon = !Helper.Reflection.GetField<List<string>>(e.NewMenu, "options").GetValue().Contains("random");
                 
                 e.NewMenu.exitThisMenuNoSound(); // is this neccessary? is there a better way?
 
-                // create default list of songs to play - apparently this is how CA hard-copied the list
-                List<string> list = Game1.player.songsHeard.Distinct().ToList();
+                // create default list of songs to play
+                // 1.6: list to hashset - shallow should be fine here?
+                HashSet<string> heardCopy = new(Game1.player.songsHeard);
 
                 // add unheard tracks
                 if (Config.ShowUnheardTracks && !Config.PermanentUnheard)
                 {
                     BetterJukeboxHelper.AddUnheardTracks(
-                        list,
+                        heardCopy,
                         Config.UnheardSoundtrack,
                         Config.UnheardNamed,
                         Config.UnheardRandom,
@@ -124,6 +122,9 @@ namespace Gaphodil.BetterJukebox
                         Config.UnheardMusical
                     );
                 }
+
+                // convert to list here instead
+                List<string> list = heardCopy.ToList();
 
                 // remove specific tracks
                 BetterJukeboxHelper.FilterTracksFromList(list, Config.AmbientTracks, Config.Blacklist, Config.Whitelist);
@@ -165,6 +166,7 @@ namespace Gaphodil.BetterJukebox
                     key => Helper.Translation.Get(key),
                     Monitor,
                     Config,
+                    isSaloon,
                     Game1.player.currentLocation.miniJukeboxTrack.Value
                 ); 
             }
