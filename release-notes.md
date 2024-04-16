@@ -1,6 +1,13 @@
 ﻿[← back to readme](README.md)
 
 # Release notes
+## 2.1.0
+Released 15 Apr 2024 (only a month late!)
+
+* Return from alpha to stable
+* Migration from `Game1.player.songsHeard` to 1.6 `Utility.GetJukeboxTracks`,
+tentatively fixing old saves with modded songs
+
 ## 2.0.1-alpha.20231216
 Released 16 Dec 2023.
 
